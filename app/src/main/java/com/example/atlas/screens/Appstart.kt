@@ -61,7 +61,16 @@ fun AppStart (controller : NavController) {
 
         )
         DefaulButton("¡Comienza a entrenar, registrate!",300,40) {controller.navigate(route = AppScreens.SingUp.name)}
-        DefaulButton("Ya tengo una cuenta",300,40) { controller.navigate(route = AppScreens.LogIn.name)}
+        Button(onClick = { controller.navigate(route = AppScreens.LogIn.name) },
+            modifier = Modifier.width(300.dp).height(40.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = colorResource(R.color.rojoGranada)
+            ),
+            border = BorderStroke(1.dp,colorResource(R.color.rojoGranada))
+        ) {
+            Text("Ya tengo una cuenta")
+        }
     }
 }
 
@@ -72,3 +81,4 @@ fun Preview (){
     AppStart(nc)
 
 }
+
