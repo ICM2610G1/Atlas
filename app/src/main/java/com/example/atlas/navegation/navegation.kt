@@ -37,8 +37,10 @@ enum class AppScreens{
     chatsP,
     Ejercicios,
     vistaSesionesEnt,
-    resumenSesion
-
+    resumenSesion,
+    RecoverPassword,
+    AppFinal,
+    MessageEmail
 
 }
 
@@ -104,9 +106,18 @@ fun Navigation(){
         composable (route= AppScreens.ChequeoSesion.name){
             ChequeoSesion(navController)
         }
-
+        composable (route= AppScreens.RecoverPassword.name){
+            RecoverPassword(navController)
+        }
+        composable (route= AppScreens.AppFinal.name){
+            AppFinal(navController)
+        }
+        composable (route= AppScreens.MessageEmail.name){
+            MessageEmail(navController)
+        }
 
     }
 
 }
+
 
