@@ -61,7 +61,7 @@ fun AppStart (controller : NavController) {
 
         )
         DefaulButton("¡Comienza a entrenar, registrate!",300,40) {controller.navigate(route = AppScreens.SingUp.name)}
-        DefaulButton("Ya tengo una cuenta",300,40) { controller.navigate(route = AppScreens.Calificar.name)}
+        DefaulButton("Ya tengo una cuenta",300,40) { controller.navigate(route = AppScreens.LogIn.name)}
     }
 }
 
@@ -70,4 +70,5 @@ fun AppStart (controller : NavController) {
 fun Preview (){
     val nc = rememberNavController();
     AppStart(nc)
+
 }
