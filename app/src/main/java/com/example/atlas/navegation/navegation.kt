@@ -21,6 +21,7 @@ import com.example.atlas.screens.CrearNuevaSesion
 import com.example.atlas.screens.DetallesTrote
 import com.example.atlas.screens.MessageEmail
 import com.example.atlas.screens.RecoverPassword
+import com.example.atlas.screens.TroteActivo
 import com.example.atlas.screens.chatP
 import com.example.atlas.screens.subirFoto
 import com.example.atlas.screens.vistaSesionesEntrenador
@@ -47,7 +48,8 @@ enum class AppScreens{
     resumenSesion,
     RecoverPassword,
     AppFinal,
-    MessageEmail
+    MessageEmail,
+    troteActivo
 
 }
 
@@ -121,6 +123,9 @@ fun Navigation(){
         }
         composable (route= AppScreens.MessageEmail.name){
             MessageEmail(navController)
+        }
+        composable (route= AppScreens.troteActivo.name){
+            TroteActivo(navController)
         }
 
     }
