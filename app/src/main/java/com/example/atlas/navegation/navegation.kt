@@ -1,4 +1,5 @@
 package com.example.atlas.navegation
+import Pantallas.PantallaEjercicios
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +17,13 @@ import com.example.atlas.screens.PerfilEnt
 import com.example.atlas.screens.SignUp
 import com.example.atlas.screens.Ubicacion
 import com.example.atlas.screens.ChequeoSesion
+import com.example.atlas.screens.CrearNuevaSesion
+import com.example.atlas.screens.DetallesTrote
+import com.example.atlas.screens.MessageEmail
+import com.example.atlas.screens.RecoverPassword
+import com.example.atlas.screens.chatP
 import com.example.atlas.screens.subirFoto
+import com.example.atlas.screens.vistaSesionesEntrenador
 
 enum class AppScreens{
     Appstart,
@@ -79,7 +86,7 @@ fun Navigation(){
         composable (route= AppScreens.Ubicacion.name){
             Ubicacion(navController)
         }
-        composable(route= AppScreens.resumenSesion.name ){
+        composable(route= AppScreens.resumenSesion.name){
             subirFoto(navController)
         }
         composable (route= AppScreens.Historial.name){
@@ -110,7 +117,7 @@ fun Navigation(){
             RecoverPassword(navController)
         }
         composable (route= AppScreens.AppFinal.name){
-            AppFinal(navController)
+            //
         }
         composable (route= AppScreens.MessageEmail.name){
             MessageEmail(navController)
@@ -119,5 +126,7 @@ fun Navigation(){
     }
 
 }
+
+
 
 
