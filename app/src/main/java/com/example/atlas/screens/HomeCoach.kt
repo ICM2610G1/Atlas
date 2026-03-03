@@ -64,7 +64,7 @@ fun HomeCoach(controller : NavController) {
                 icono_circulo(R.drawable.icon_ojo, "VerSesiones")
                 DefaulButton("VerSesiones", 220, 40) {
                     Log.i("TAGVerSesiones", "Click VerSesiones")
-                    controller.navigate(route = AppScreens.Historial.name)
+                    controller.navigate(route = AppScreens.vistaSesionesEnt.name)
                 }
             }
             Row(
@@ -76,7 +76,7 @@ fun HomeCoach(controller : NavController) {
                 icono_circulo(R.drawable.mapa, "Seguimiento en Vivo")
                 DefaulButton("Seguimiento en vivo", 220, 40) {
                     Log.i("TAGSeguimineto", "Click Seguimineto en vivo ")
-                    controller.navigate(route = AppScreens.Ubicacion.name)
+                    controller.navigate(route = AppScreens.troteActivo.name)
                 }
             }
             Row(

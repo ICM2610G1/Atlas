@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.navegation.AppScreens
 
 data class SesionesActivas(val nombre: String, val actividad: String, val fecha: String, val estado: String)
 
@@ -102,8 +103,7 @@ fun vistaSesionesEntrenador(controller: NavController){
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().clickable {
-                            }.padding(15.dp)
+                            modifier = Modifier.fillMaxWidth().clickable{controller.navigate(route= AppScreens.Ejercicios.name)}.padding(15.dp)
                         ) {
                             Box {
                                 Icon(
