@@ -6,6 +6,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.atlas.screens.AppStart
 import com.example.atlas.screens.Calificar
 import com.example.atlas.screens.Chats
+import com.example.atlas.screens.DetalleSesion
 import com.example.atlas.screens.Historial
 import com.example.atlas.screens.Home
 import com.example.atlas.screens.HomeCoach
@@ -14,23 +15,22 @@ import com.example.atlas.screens.Perfil
 import com.example.atlas.screens.PerfilEnt
 import com.example.atlas.screens.SingUp
 import com.example.atlas.screens.Ubicacion
+import com.example.atlas.screens.ChequeoSesion
 
 enum class AppScreens{
     Appstart,
     Home,
-    HomeCoach ,
+    HomeCoach,
     Perfil,
-
     Chats,
-
-    Ubicacion ,
-
+    Ubicacion,
     Historial,
     PerfilEnt,
     Calificar,
     SingUp,
     LogIn,
-
+    DetalleSesion,
+    ChequeoSesion,
 }
 
 @Composable
@@ -70,6 +70,13 @@ fun Navigation(){
         composable (route= AppScreens.LogIn.name){
             LogIn(navController)
         }
+        composable (route= AppScreens.DetalleSesion.name){
+            DetalleSesion(navController)
+        }
+        composable (route= AppScreens.ChequeoSesion.name){
+            ChequeoSesion(navController)
+        }
+
 
     }
 }
