@@ -20,16 +20,17 @@ enum class AppScreens{
     Home,
     HomeCoach ,
     Perfil,
-
     Chats,
-
     Ubicacion ,
-
     Historial,
     PerfilEnt,
     Calificar,
     SingUp,
     LogIn,
+    chatsP,
+    vistaSesionesEnt,
+    resumenSesion
+
 
 }
 
@@ -49,8 +50,18 @@ fun Navigation(){
         composable (route= AppScreens.Chats.name){
             Chats(navController)
         }
+        composable(route= AppScreens.chatsP.name + "/{nombre}") {  backStackEntry ->
+            val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
+            chatP(nombre, navController)
+        }
+        composable(route= AppScreens.vistaSesionesEnt.name) {
+            vistaSesionesEntrenador(navController)
+        }
         composable (route= AppScreens.Ubicacion.name){
             Ubicacion(navController)
+        }
+        composable(route= AppScreens.resumenSesion.name ){
+            subirFoto(navController)
         }
         composable (route= AppScreens.Historial.name){
             Historial(navController)
@@ -72,4 +83,5 @@ fun Navigation(){
         }
 
     }
+
 }
