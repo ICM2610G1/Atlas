@@ -37,6 +37,7 @@ import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.navegation.AppScreens
 
 @Composable
 fun ChequeoSesion(controller: NavController) {
@@ -195,7 +196,7 @@ fun ChequeoSesion(controller: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             DefaulButton(text = "Terminar sesion", ancho = 240, alto = 50) {
-                /* Acción terminar sesión */
+                controller.navigate(route= AppScreens.resumenSesion.name)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

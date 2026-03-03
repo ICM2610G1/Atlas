@@ -165,7 +165,7 @@ fun CrearNuevaSesion(controller: NavController) {
             ) {
                 DefaulButton("Programar sesion", 220, 40) {
                     Log.i("TAGInicio", "Click Iniciar ")
-                    controller.navigate(route = AppScreens.resumen.name)
+                    controller.navigate(route = AppScreens.ChequeoSesion.name)
                 }
             }
         }

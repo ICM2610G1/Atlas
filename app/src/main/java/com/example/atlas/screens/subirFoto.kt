@@ -1,6 +1,7 @@
 package com.example.atlas.screens
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,9 +36,11 @@ import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.navegation.AppScreens
 
 @Composable
 fun subirFoto(controller: NavController) {
+    val context = LocalContext.current
     Scaffold(
         topBar = { DefaultTopAppBar("Sesiones programadas") },
         bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, controller) }
@@ -193,7 +197,11 @@ fun subirFoto(controller: NavController) {
                 }
             }
             Column(modifier=Modifier.fillMaxWidth(),verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                DefaulButton("Terminar sesion", 220, 40) { Log.i("Camara", "Abriendo camara") }
+                DefaulButton("Terminar sesion", 220, 40) {
+                    controller.navigate(route= AppScreens.Home.name)
+                    Toast.makeText(context, "Sesión finalizada y registrada", Toast.LENGTH_LONG).show()
+
+                }
             }
         }
     }

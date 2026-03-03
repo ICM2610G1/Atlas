@@ -37,6 +37,7 @@ import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.navegation.AppScreens
 
 @Composable
 fun VisualizarDeportista(controller: NavController) {
@@ -148,7 +149,7 @@ fun VisualizarDeportista(controller: NavController) {
             Spacer(modifier = Modifier.height(32.dp))
 
             DefaulButton(text = "Ver rutina", ancho = 300, alto = 50) {
-                /* Acción */
+                controller.navigate(route= AppScreens.Ubicacion.name)
             }
 
             Spacer(modifier = Modifier.height(24.dp))

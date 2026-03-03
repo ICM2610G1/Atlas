@@ -3,6 +3,7 @@ package com.example.atlas.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.R
+import com.example.atlas.navegation.AppScreens
 
 @Composable
 fun TroteActivo(controller: NavController) {
@@ -54,7 +56,6 @@ fun TroteActivo(controller: NavController) {
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -91,8 +92,6 @@ fun TroteActivo(controller: NavController) {
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -100,12 +99,12 @@ fun TroteActivo(controller: NavController) {
                 CardDeportista(
                     nombre = "Andres Carvajal",
                     ubicacion = "Parque Nacional",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).clickable{controller.navigate(route= AppScreens.Ubicacion.name)}
                 )
                 CardDeportista(
                     nombre = "Adriana Salazar",
                     ubicacion = "Av. Boyacá, Calle 80",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).clickable{controller.navigate(route= AppScreens.Ubicacion.name)}
                 )
             }
 
@@ -118,12 +117,12 @@ fun TroteActivo(controller: NavController) {
                 CardDeportista(
                     nombre = "Pedro Gonzalez",
                     ubicacion = "Cra 50, Av. Esperanza",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).clickable{controller.navigate(route= AppScreens.Ubicacion.name)}
                 )
                 CardDeportista(
                     nombre = "Fernando Torres",
                     ubicacion = "CC Gran Estación",
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).clickable{controller.navigate(route= AppScreens.Ubicacion.name)}
                 )
             }
 

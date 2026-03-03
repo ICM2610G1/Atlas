@@ -16,13 +16,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.atlas.R
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.navegation.AppScreens
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUp(navController: NavHostController) {
+fun SignUp(controller: NavController) {
 
     val rojo = colorResource(id = R.color.rojoGranada)
     val fondo = colorResource(id = R.color.pink)
@@ -130,7 +132,7 @@ fun SignUp(navController: NavHostController) {
                 }
 
                 Button(
-                    onClick = { },
+                    onClick = {controller.navigate(route= AppScreens.Home.name) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 20.dp)

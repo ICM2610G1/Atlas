@@ -40,7 +40,7 @@ fun DetalleSesion(controller: NavController) {
         topBar = { DefaultTopAppBar(nombre = "Mis sesiones") },
         bottomBar = { DefaultBottomBarDep(colorId = R.color.white, controller = controller) }
     ) { paddingValues ->
-        // Contenedor principal
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -50,7 +50,6 @@ fun DetalleSesion(controller: NavController) {
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Encabezado de la Sesión
             Text(
                 text = "Sesion #",
                 color = colorResource(R.color.rojoGranada),
@@ -71,7 +70,6 @@ fun DetalleSesion(controller: NavController) {
                     .height(280.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Tarjeta TROTE
                 Card(
                     modifier = Modifier
                         .weight(1f)
@@ -125,7 +123,6 @@ fun DetalleSesion(controller: NavController) {
                     }
                 }
 
-                // Tarjeta GYM
                 Card(
                     modifier = Modifier
                         .weight(1f)
@@ -180,7 +177,6 @@ fun DetalleSesion(controller: NavController) {
                     .height(150.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Tarjeta de fotos
                 Card(
                     modifier = Modifier
                         .weight(1.5f)
@@ -213,7 +209,6 @@ fun DetalleSesion(controller: NavController) {
                     }
                 }
 
-                // Tarjeta ver detalles
                 Card(
                     modifier = Modifier.weight(1f),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),

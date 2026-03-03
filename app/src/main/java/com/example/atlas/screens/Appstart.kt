@@ -1,6 +1,7 @@
 package com.example.atlas.screens
 
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -8,6 +9,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,7 +64,7 @@ fun AppStart (controller : NavController) {
             modifier = Modifier.height(500.dp)
 
         )
-        DefaulButton("¡Comienza a entrenar, registrate!",300,40) {controller.navigate(route = AppScreens.SingUp.name)}
+        DefaulButton("¡Comienza a entrenar, registrate!",300,40) {controller.navigate(route = AppScreens.SignUp.name)}
         Button(onClick = { controller.navigate(route = AppScreens.LogIn.name) },
             modifier = Modifier.width(300.dp).height(40.dp),
             colors = ButtonDefaults.buttonColors(

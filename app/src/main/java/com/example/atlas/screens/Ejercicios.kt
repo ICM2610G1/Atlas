@@ -49,7 +49,7 @@ fun PantallaEjercicios(controller: NavController) {
 
     Scaffold(
         containerColor = colorResource(R.color.pink),
-        topBar = { DefaultTopAppBar("Detalles de trote") },
+        topBar = { DefaultTopAppBar("Ejercicios") },
         bottomBar = { DefaultBottomBarDep(R.color.white, controller) }
     ) { padding ->
 

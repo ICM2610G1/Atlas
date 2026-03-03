@@ -106,7 +106,7 @@ fun Historial(controller: NavController) {
 private fun CardSesion(sesion: Sesion, controller: NavController) {
 
     val estadoColor = if (sesion.completado)
-        colorResource(id = R.color.verde_completado)
+        colorResource(id = R.color.teal_700)
     else
         colorResource(id = R.color.rojoGranada)
 
@@ -154,7 +154,7 @@ private fun CardSesion(sesion: Sesion, controller: NavController) {
 
             Box(modifier = Modifier.width(12.dp))
 
-            IconButton(onClick = {controller.navigate(route = AppScreens.Home.name) }) { //actualizar a la pantalla "detalle sesion"
+            IconButton(onClick = {controller.navigate(route = AppScreens.DetalleSesion.name) }) {
                 Text(
                     text = ">",
                     color = colorResource(id = R.color.rojoGranada),
