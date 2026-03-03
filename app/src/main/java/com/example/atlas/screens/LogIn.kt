@@ -129,7 +129,11 @@ fun LogIn(controller: NavController){
                 }
                 DefaulButton("Iniciar", 380, 40) {
                     Log.i("TAGIniciarSesion", "Click IniciarSesion")
-                    controller.navigate(route = AppScreens.Home.name)
+                    if (input.lowercase() == "entrenador") {
+                        controller.navigate(route = AppScreens.HomeCoach.name)
+                    } else {
+                        controller.navigate(route = AppScreens.Home.name)
+                    }
                 }
             }
         }
@@ -147,5 +151,6 @@ fun PreviewLogIn (){
     val nc = rememberNavController()
     LogIn(nc)
 }
+
 
 
