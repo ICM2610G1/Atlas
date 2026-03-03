@@ -22,7 +22,7 @@ import com.example.atlas.elements.DefaultTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SingUp(navController: NavHostController) {
+fun SignUp(navController: NavHostController) {
 
     val rojo = colorResource(id = R.color.rojoGranada)
     val fondo = colorResource(id = R.color.pink)
@@ -146,3 +146,4 @@ fun SingUp(navController: NavHostController) {
         }
     }
 }
+
