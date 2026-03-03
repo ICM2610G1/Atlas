@@ -16,6 +16,7 @@ import com.example.atlas.screens.PerfilEnt
 import com.example.atlas.screens.SingUp
 import com.example.atlas.screens.Ubicacion
 import com.example.atlas.screens.ChequeoSesion
+import com.example.atlas.screens.subirFoto
 
 enum class AppScreens{
     Appstart,
@@ -31,6 +32,11 @@ enum class AppScreens{
     LogIn,
     DetalleSesion,
     ChequeoSesion,
+    chatsP,
+    vistaSesionesEnt,
+    resumenSesion
+
+
 }
 
 @Composable
@@ -49,8 +55,18 @@ fun Navigation(){
         composable (route= AppScreens.Chats.name){
             Chats(navController)
         }
+        composable(route= AppScreens.chatsP.name + "/{nombre}") {  backStackEntry ->
+            val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
+            chatP(nombre, navController)
+        }
+        composable(route= AppScreens.vistaSesionesEnt.name) {
+            vistaSesionesEntrenador(navController)
+        }
         composable (route= AppScreens.Ubicacion.name){
             Ubicacion(navController)
+        }
+        composable(route= AppScreens.resumenSesion.name ){
+            subirFoto(navController)
         }
         composable (route= AppScreens.Historial.name){
             Historial(navController)
@@ -79,4 +95,5 @@ fun Navigation(){
 
 
     }
+
 }
