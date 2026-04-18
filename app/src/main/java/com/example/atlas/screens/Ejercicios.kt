@@ -12,6 +12,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,13 +26,53 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlin.collections.emptyList
+data class SobreEjercicios(
+    val lista: List<Ejercicio> = emptyList()
+)
 
+class EjercicioViewModel : ViewModel() {
+
+    private val _estado = MutableStateFlow(SobreEjercicios())
+    val estado: StateFlow<SobreEjercicios> = _estado.asStateFlow()
+
+    fun agregarEjercicio(nombre: String) {
+        val nuevo = Ejercicio(
+            id = _estado.value.lista.size + 1,
+            nombre = nombre,
+            series = 3,
+            rep = 10,
+            kg = 22,
+            completado = false
+        )
+        _estado.update {
+            it.copy(lista = it.lista + nuevo)
+        }
+    }
+    fun toggleCompletado(id: Int) {
+        _estado.update {
+            it.copy(
+                lista = it.lista.map { ejercicio ->
+                    if (ejercicio.id == id) {
+                        ejercicio.copy(completado = !ejercicio.completado)
+                    } else ejercicio
+                }
+            )
+        }
+    }
+}
 data class Ejercicio(
     val id: Int,
     val nombre: String,
@@ -37,97 +84,94 @@ data class Ejercicio(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaEjercicios(controller: NavController, ejercicio: String?=null) {
+fun PantallaEjercicios(controller: NavController, ejercicio: String?=null, viewModel: EjercicioViewModel = viewModel() ){
 
-    val rojo = colorResource(id = R.color.rojoGranada)
+    val estado by viewModel.estado.collectAsState()
 
-
-    val ejercicios = mutableListOf(
-        Ejercicio(1, "Press de Banca Plano", 4, 10, 60, true),
-        Ejercicio(2, "Sentadilla con Barra", 4, 8, 80, true),
-        Ejercicio(3, "Peso Muerto Rumano", 3, 12, 50, false),
-        Ejercicio(4, "Press Militar", 3, 10, 18, true),
-        Ejercicio(5, "Curl de Bíceps con Mancuerna", 3, 12, 14, false),
-        Ejercicio(6, "Extensión de Tríceps", 3, 15, 20, true)
-    )
-
-    if(ejercicio !=null){
-        ejercicios.add(Ejercicio(7, ejercicio,3,10,22, false ))
+    LaunchedEffect(ejercicio) {
+        if (ejercicio != null) {
+            viewModel.agregarEjercicio(ejercicio)
+        }
     }
+
     Scaffold(
         containerColor = colorResource(R.color.pink),
         topBar = { DefaultTopAppBar("Ejercicios") },
-        floatingActionButton = {
-            DefaulButton("Agregar ejercicios", 220, 40) {
-                controller.navigate(route = AppScreens.agregarEjercicio.name)
-            }
-        },
         bottomBar = { DefaultBottomBarDep(R.color.white, controller) }
     ) { padding ->
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            LazyColumn(
+                modifier = Modifier.padding(16.dp).weight(8f),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
+                items(estado.lista) { ejercicio ->
 
-            items(ejercicios) { ejercicio ->
-
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
 
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
 
-                            Text(
-                                text = ejercicio.nombre,
-                                color = rojo,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
 
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("Series", fontWeight = FontWeight.Bold)
-                                    Text("${ejercicio.series}")
-                                }
+                                Text(
+                                    text = ejercicio.nombre,
+                                    color = colorResource(R.color.rojoGranada),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp
+                                )
 
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("Rep", fontWeight = FontWeight.Bold)
-                                    Text("${ejercicio.rep}")
-                                }
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
 
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text("Kg", fontWeight = FontWeight.Bold)
-                                    Text("${ejercicio.kg}")
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text("Series", fontWeight = FontWeight.Bold)
+                                        Text("${ejercicio.series}")
+                                    }
+
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text("Rep", fontWeight = FontWeight.Bold)
+                                        Text("${ejercicio.rep}")
+                                    }
+
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text("Kg", fontWeight = FontWeight.Bold)
+                                        Text("${ejercicio.kg}")
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        Column() {
-            DefaulButton("Agregar ejercicios", 220, 40) {
-                controller.navigate(route = AppScreens.agregarEjercicio.name)
+            Column(modifier=Modifier.weight(2f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding (vertical = 50.dp),
+                    horizontalArrangement = Arrangement.Center
+
+                ) {
+                    DefaulButton("Agregar ejercicios", 220, 40) {
+                        controller.navigate(route = AppScreens.agregarEjercicio.name)
+                    }
+                    DefaulButton("Iniciar actividad", 220, 40) {
+                        controller.navigate(route = AppScreens.ChequeoSesion.name)
+
+                    }
+                }
             }
         }
     }

@@ -81,6 +81,20 @@ fun Home (controller : NavController){
                     controller.navigate(route = AppScreens.crearSesion.name)
                 }
             }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1F)
+
+            ) {
+
+                icono_circulo(R.drawable.pesa, "Progreso")
+                DefaulButton("Revisar Progreso", 220, 40) {
+                    controller.navigate(route = AppScreens.Progreso.name)
+                }
+            }
+
+
             Row(verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Start,
                 modifier = Modifier.fillMaxWidth().height(250.dp)) {

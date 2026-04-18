@@ -30,9 +30,11 @@ import androidx.compose.ui.unit.sp
 
 import androidx.navigation.NavController
 import com.example.atlas.R
+import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.navegation.AppScreens
 
 @Composable
 fun MiUbicacion (controller: NavController, inicio: String , final:String, actividad:String){
@@ -41,7 +43,7 @@ fun MiUbicacion (controller: NavController, inicio: String , final:String, activ
         bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, controller) }
     ) {paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            Box(modifier = Modifier.weight(1f).padding(horizontal = 30.dp, vertical =15.dp)) {
+            Box(modifier = Modifier.weight(2f).padding(horizontal = 30.dp, vertical =15.dp)) {
                 Image(
                     painterResource(R.drawable.mapatemporal),
                     "Mapa",
@@ -54,7 +56,7 @@ fun MiUbicacion (controller: NavController, inicio: String , final:String, activ
                 )
             }
             ElevatedCard(
-                modifier = Modifier.padding(vertical = 15.dp, horizontal = 30.dp),
+                modifier = Modifier.padding(vertical = 15.dp, horizontal = 30.dp).weight(0.7f),
                 colors= CardDefaults.cardColors(colorResource(R.color.pink))
             ) {
                 Row(
@@ -89,8 +91,15 @@ fun MiUbicacion (controller: NavController, inicio: String , final:String, activ
                     }
                 }
             }
+            Column(modifier=Modifier.weight(1f).fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                DefaulButton("Finalizar actividad", 220, 40) {
+                    controller.navigate(route= AppScreens.crearSesion.name)
+                }
+            }
+            }
         }
     }
 
 
-}
+

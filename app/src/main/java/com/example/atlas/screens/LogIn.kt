@@ -100,9 +100,6 @@ fun LogIn(controller: NavController){
                     modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
                 ) {
-
-
-
                     Text(
                         "Restablecer contraseña?",
                         color = colorResource(R.color.rojoGranada),
