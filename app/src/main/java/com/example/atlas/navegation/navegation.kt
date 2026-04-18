@@ -1,11 +1,15 @@
 package com.example.atlas.navegation
+import Pantallas.EjercicioViewModel
 import Pantallas.PantallaEjercicios
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.atlas.screens.AppStart
 import com.example.atlas.screens.Calificar
+import com.example.atlas.screens.Camara
 import com.example.atlas.screens.CatalogoActividades
 import com.example.atlas.screens.Chats
 import com.example.atlas.screens.DetalleSesion
@@ -22,6 +26,7 @@ import com.example.atlas.screens.CrearNuevaSesion
 import com.example.atlas.screens.DetallesTrote
 import com.example.atlas.screens.MessageEmail
 import com.example.atlas.screens.MiUbicacion
+import com.example.atlas.screens.Progreso
 import com.example.atlas.screens.RecoverPassword
 import com.example.atlas.screens.TroteActivo
 import com.example.atlas.screens.chatP
@@ -55,7 +60,9 @@ enum class AppScreens{
     MessageEmail,
     troteActivo,
 
-    agregarEjercicio
+    agregarEjercicio,
+    Camara,
+    Progreso
 
 }
 
@@ -85,12 +92,19 @@ fun Navigation(){
         composable (route= AppScreens.crearSesion.name){
             CrearNuevaSesion(navController)
         }
-        composable (route= AppScreens.Ejercicios.name+"/{ejercicio}"){backStackEntry->
-            val ejercicioNuevo = backStackEntry.arguments?.getString("ejercicio") ?: ""
-            PantallaEjercicios(navController, ejercicioNuevo)
+        composable (route= AppScreens.Ejercicios.name+"/{ejercicio}"){
+                backStackEntry ->
+
+            val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(AppScreens.Ejercicios.name) }
+            val viewModel: EjercicioViewModel = viewModel(parentEntry)
+            val ejercicio = backStackEntry.arguments?.getString("ejercicio")
+
+            PantallaEjercicios(controller = navController, ejercicio = ejercicio, viewModel = viewModel)
         }
         composable (route= AppScreens.Ejercicios.name){
-            PantallaEjercicios(navController)
+            val viewModel: EjercicioViewModel = viewModel()
+
+            PantallaEjercicios(controller = navController, viewModel = viewModel)
         }
         composable (route= AppScreens.detallesTrote.name){
             DetallesTrote(navController)
@@ -126,8 +140,13 @@ fun Navigation(){
         composable (route= AppScreens.DetalleSesion.name){
             DetalleSesion(navController)
         }
-        composable (route= AppScreens.ChequeoSesion.name){
-            ChequeoSesion(navController)
+        composable (route= AppScreens.ChequeoSesion.name){backStackEntry->
+            val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry(AppScreens.Ejercicios.name)
+
+        }
+            val viewModel: EjercicioViewModel = viewModel(parentEntry)
+            ChequeoSesion(navController,viewModel)
         }
         composable (route= AppScreens.RecoverPassword.name){
             RecoverPassword(navController)
@@ -144,6 +163,13 @@ fun Navigation(){
         }
         composable (route= AppScreens.troteActivo.name){
             TroteActivo(navController)
+        }
+        composable (route = AppScreens.Progreso.name ){
+            Progreso(navController)
+
+        }
+        composable (route = AppScreens.Camara.name){
+            Camara (navController)
         }
 
     }
