@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.atlas.screens.AppStart
 import com.example.atlas.screens.Calificar
+import com.example.atlas.screens.CatalogoActividades
 import com.example.atlas.screens.Chats
 import com.example.atlas.screens.DetalleSesion
 import com.example.atlas.screens.Historial
@@ -20,6 +21,7 @@ import com.example.atlas.screens.ChequeoSesion
 import com.example.atlas.screens.CrearNuevaSesion
 import com.example.atlas.screens.DetallesTrote
 import com.example.atlas.screens.MessageEmail
+import com.example.atlas.screens.MiUbicacion
 import com.example.atlas.screens.RecoverPassword
 import com.example.atlas.screens.TroteActivo
 import com.example.atlas.screens.chatP
@@ -33,6 +35,8 @@ enum class AppScreens{
     Perfil,
     Chats,
     Ubicacion,
+
+    Mimapa,
     Historial,
     PerfilEnt,
     Calificar,
@@ -49,14 +53,16 @@ enum class AppScreens{
     RecoverPassword,
     AppFinal,
     MessageEmail,
-    troteActivo
+    troteActivo,
+
+    agregarEjercicio
 
 }
 
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
-    NavHost(navController, startDestination = AppScreens.Appstart.name) {
+    NavHost(navController, startDestination = AppScreens.Home.name) {
         composable (route= AppScreens.Appstart.name){
             AppStart(navController)
         }
@@ -78,6 +84,10 @@ fun Navigation(){
         }
         composable (route= AppScreens.crearSesion.name){
             CrearNuevaSesion(navController)
+        }
+        composable (route= AppScreens.Ejercicios.name+"/{ejercicio}"){backStackEntry->
+            val ejercicioNuevo = backStackEntry.arguments?.getString("ejercicio") ?: ""
+            PantallaEjercicios(navController, ejercicioNuevo)
         }
         composable (route= AppScreens.Ejercicios.name){
             PantallaEjercicios(navController)
@@ -106,6 +116,10 @@ fun Navigation(){
         composable (route= AppScreens.SignUp.name){
             SignUp(navController)
         }
+
+        composable (route= AppScreens.agregarEjercicio.name){
+            CatalogoActividades(navController)
+        }
         composable (route= AppScreens.LogIn.name){
             LogIn(navController)
         }
@@ -118,8 +132,12 @@ fun Navigation(){
         composable (route= AppScreens.RecoverPassword.name){
             RecoverPassword(navController)
         }
-        composable (route= AppScreens.AppFinal.name){
-            //
+        composable (route= AppScreens.Mimapa.name + "/{inicio}/{fin}/{actividad}"){backStackEntry->
+            val lugarInicio = backStackEntry.arguments?.getString("inicio") ?: ""
+            val lugarFinal = backStackEntry.arguments?.getString("fin") ?: ""
+            val actividad = backStackEntry.arguments?.getString("actividad") ?: ""
+
+            MiUbicacion(navController, lugarInicio, lugarFinal, actividad)
         }
         composable (route= AppScreens.MessageEmail.name){
             MessageEmail(navController)
