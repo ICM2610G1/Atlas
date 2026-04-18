@@ -101,23 +101,7 @@ fun LogIn(controller: NavController){
                     horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
                 ) {
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(
-                                if (rememberPassword)
-                                    R.drawable.ic_check_box
-                                else
-                                    R.drawable.ic_check_box_outline
-                            ),
-                            contentDescription = "Recordar contraseña",
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(15.dp).clickable { rememberPassword = !rememberPassword }.padding(horizontal = 1.dp)
-                        )
 
-                        Text("Recordar contraseña", modifier = Modifier.padding(horizontal = 2.dp))
-                    }
 
                     Text(
                         "Restablecer contraseña?",

@@ -1,5 +1,6 @@
 package com.example.atlas.screens
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,13 +14,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -33,9 +42,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.atlas.R
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.navegation.AppScreens
 
 @Composable
 fun DetalleSesion(controller: NavController) {
+    val historialPresion = listOf(10f, 30f, 25f, 50f, 70f, 60f, 90f, 40f, 30f, 55f)
     Scaffold(
         topBar = { DefaultTopAppBar(nombre = "Mis sesiones") },
         bottomBar = { DefaultBottomBarDep(colorId = R.color.white, controller = controller) }
@@ -45,9 +56,7 @@ fun DetalleSesion(controller: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
+                .padding(horizontal = 24.dp)) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
@@ -63,181 +72,205 @@ fun DetalleSesion(controller: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Cuadrícula de Métricas
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(280.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+            // Card actividad en movimiento
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
-                Card(
+                Column(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    Text(
+                        "Actividad en movimiento",
+                        color = colorResource(R.color.rojoGranada),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Text("TROTE",
-                            color = colorResource(R.color.rojoGranada),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text("Tiempo:",
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text("-- Min.",
-                            color = colorResource(R.color.rojoGranada),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text("Pasos totales:",
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text("----",
-                            color = colorResource(R.color.rojoGranada),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text("Velocidad\npromedio:",
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                        Text("-- km/h",
-                            color = colorResource(R.color.rojoGranada),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Tiempo", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Text(
+                                "-- Min.",
+                                color = colorResource(R.color.rojoGranada),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text("Distancia", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                            Text(
+                                "-- km",
+                                color = colorResource(R.color.rojoGranada),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                        }
                     }
-                }
 
-                Card(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        Text("GYM",
-                            color = colorResource(R.color.rojoGranada),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Velocidad promedio",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "-- km/h",
+                                color = colorResource(R.color.rojoGranada),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Temperatura",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "-- °C",
+                                color = colorResource(R.color.rojoGranada),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                        }
+                    }
 
-                        Text("Cantidad de\nejercicios:",
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                        Text("--",
-                            color = colorResource(R.color.rojoGranada),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
 
-                        Text("Calorías perdidas",
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
-                        )
-                        Text("----",
-                            color = colorResource(R.color.rojoGranada),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "Actividad de fuerza",
+                        color = colorResource(R.color.rojoGranada),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Ejercicios",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp
+                            )
+                            Text(
+                                "--",
+                                color = colorResource(R.color.rojoGranada),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                "Calorías perdidas",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 13.sp,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                "-- kcal",
+                                color = colorResource(R.color.rojoGranada),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                        }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Fotos y Detalles
-            Row(
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                onClick = { controller.navigate(AppScreens.Ejercicios.name)}
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Ver detalles de ejercicios",
+                        color = colorResource(R.color.rojoGranada),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+
+                }
+            }
+
+            Text(
+                "Altitud durante el entrenamiento",
+                modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 10.dp),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray
+            )
+
+            ElevatedCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .height(200.dp)
+                    .padding(horizontal = 15.dp),
+                colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
             ) {
-                Card(
-                    modifier = Modifier
-                        .weight(1.5f)
-                        .fillMaxHeight(),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text("Como terminó tu día", color = colorResource(R.color.rojoGranada), fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            // Imágenes
-                            Image(
-                                painter = painterResource(id = R.drawable.img_placeholder),
-                                contentDescription = "Foto 1",
-                                modifier = Modifier.size(60.dp)
-                            )
-                            Image(
-                                painter = painterResource(id = R.drawable.img_placeholder),
-                                contentDescription = "Foto 2",
-                                modifier = Modifier.size(60.dp)
-                            )
-                        }
-                    }
-                }
+                Canvas(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+                    val spacing = size.width / historialPresion.size
+                    val barWidth = spacing * 0.6f
+                    val maxVal = historialPresion.maxOrNull() ?: 1f
 
-                Card(
-                    modifier = Modifier.weight(1f),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Ver\ndetalles de\nejercicios",
-                            color = colorResource(R.color.rojoGranada),
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center
+                    historialPresion.forEachIndexed { index, value ->
+                        val barHeight = (value / maxVal) * size.height
+                        drawRoundRect(
+                            color = Color.Black,
+                            topLeft = Offset(index * spacing, size.height - barHeight),
+                            size = Size(barWidth, barHeight),
+                            cornerRadius = CornerRadius(4.dp.toPx())
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewDetallesSesion() {
-    DetalleSesion(rememberNavController())
 }

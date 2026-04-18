@@ -1,5 +1,6 @@
 package Pantallas
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -20,8 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.atlas.R
+import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.navegation.AppScreens
 
 data class Ejercicio(
     val id: Int,
@@ -34,11 +37,12 @@ data class Ejercicio(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaEjercicios(controller: NavController) {
+fun PantallaEjercicios(controller: NavController, ejercicio: String?=null) {
 
     val rojo = colorResource(id = R.color.rojoGranada)
 
-    val ejercicios = listOf(
+
+    val ejercicios = mutableListOf(
         Ejercicio(1, "Press de Banca Plano", 4, 10, 60, true),
         Ejercicio(2, "Sentadilla con Barra", 4, 8, 80, true),
         Ejercicio(3, "Peso Muerto Rumano", 3, 12, 50, false),
@@ -47,9 +51,17 @@ fun PantallaEjercicios(controller: NavController) {
         Ejercicio(6, "Extensión de Tríceps", 3, 15, 20, true)
     )
 
+    if(ejercicio !=null){
+        ejercicios.add(Ejercicio(7, ejercicio,3,10,22, false ))
+    }
     Scaffold(
         containerColor = colorResource(R.color.pink),
         topBar = { DefaultTopAppBar("Ejercicios") },
+        floatingActionButton = {
+            DefaulButton("Agregar ejercicios", 220, 40) {
+                controller.navigate(route = AppScreens.agregarEjercicio.name)
+            }
+        },
         bottomBar = { DefaultBottomBarDep(R.color.white, controller) }
     ) { padding ->
 
@@ -71,9 +83,7 @@ fun PantallaEjercicios(controller: NavController) {
                 ) {
 
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
@@ -111,25 +121,13 @@ fun PantallaEjercicios(controller: NavController) {
                                 }
                             }
                         }
-
-                        IconButton(
-                            onClick = {},
-                            modifier = Modifier
-                                .size(50.dp)
-                                .border(
-                                    width = 2.dp,
-                                    color = rojo,
-                                    shape = CircleShape
-                                )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null,
-                                tint = rojo
-                            )
-                        }
                     }
                 }
+            }
+        }
+        Column() {
+            DefaulButton("Agregar ejercicios", 220, 40) {
+                controller.navigate(route = AppScreens.agregarEjercicio.name)
             }
         }
     }

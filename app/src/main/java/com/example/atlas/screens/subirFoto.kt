@@ -2,12 +2,14 @@ package com.example.atlas.screens
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -22,6 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -41,15 +48,26 @@ import com.example.atlas.navegation.AppScreens
 @Composable
 fun subirFoto(controller: NavController) {
     val context = LocalContext.current
+    val historialPresion = listOf(10f, 30f, 25f, 50f, 70f, 60f, 90f, 40f, 30f, 55f)
+    val rojoGranada = colorResource(R.color.rojoGranada)
+
     Scaffold(
-        topBar = { DefaultTopAppBar("Sesiones programadas") },
+        topBar = { DefaultTopAppBar("Resumen de tu sesión") },
         bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, controller) }
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .padding(bottom = 20.dp)
+        ) {
+            // --- Bloque del Puma y Diálogo ---
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth().height(150.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(130.dp) // Un poco más pequeño para dar espacio
             ) {
                 Image(
                     painter = painterResource(R.drawable.puma),
@@ -57,7 +75,7 @@ fun subirFoto(controller: NavController) {
                     contentScale = ContentScale.FillHeight,
                     modifier = Modifier.fillMaxHeight()
                 )
-                Box(contentAlignment = Alignment.Center) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                     Image(
                         painter = painterResource(R.drawable.burbujadialogo),
                         contentDescription = "Dialogo",
@@ -65,145 +83,98 @@ fun subirFoto(controller: NavController) {
                         contentScale = ContentScale.FillBounds,
                     )
                     Text(
-                        "Mira un resumen de tu sesión ",
-                        color = colorResource(R.color.rojoGranada),
-                        fontSize = (18.sp),
-                        modifier = Modifier.padding(25.dp),
+                        "Mira el resumen de datos\nde tus sensores",
+                        color = rojoGranada,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 30.dp, vertical = 20.dp),
                         textAlign = TextAlign.Center
                     )
                 }
             }
-            Row(modifier = Modifier.height(250.dp)) {
-                ElevatedCard(modifier = Modifier.weight(1f).padding(10.dp).fillMaxHeight()) {
-                    Column(
-                        modifier = Modifier.padding(15.dp).fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "Trote",
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.rojoGranada)
-                        )
-                        Text(
-                            "Tiempo",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.black)
-                        )
-                        Text(
-                            "00:00 min",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.rojoGranada)
-                        )
-                        Text(
-                            "Pasos totales",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.black)
-                        )
-                        Text(
-                            "0 pasos",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.rojoGranada)
-                        )
-                        Text(
-                            "Velocidad ",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.black)
-                        )
-                        Text(
-                            "promedio",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.black)
-                        )
-                        Text(
-                            "0.0 km/h",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.rojoGranada)
-                        )
-                    }
-                }
-                ElevatedCard(modifier = Modifier.weight(1f).padding(10.dp).fillMaxHeight()) {
-                    Column(
-                        modifier = Modifier.padding(15.dp).fillMaxWidth(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            "Sesión",
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.rojoGranada)
-                        )
-                        Text(
-                            "# Ejercicios",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.black)
-                        )
-                        Text(
-                            "x",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.rojoGranada)
-                        )
-                        Text(
-                            "Calorias",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.black)
-                        )
-                        Text(
-                            "Quemadas",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.black)
-                        )
-                        Text(
-                            "0 Kcal",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.rojoGranada)
-                        )
-                    }
-                }
-            }
-            ElevatedCard(modifier = Modifier.padding(15.dp).fillMaxWidth()) {
-                Column(
-                    modifier = Modifier.fillMaxWidth().clickable {},
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        "Captura aqui tu progreso",
-                        fontSize = 25.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorResource(R.color.rojoGranada),
-                        modifier = Modifier.align(alignment = Alignment.CenterHorizontally)
-                    )
-                    Icon(
-                        painterResource(R.drawable.camara),
-                        contentDescription = "Camara",
-                        modifier = Modifier.size(80.dp)
-                            .align(alignment = Alignment.CenterHorizontally)
-                    )
-                }
-            }
-            Column(modifier=Modifier.fillMaxWidth(),verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                DefaulButton("Terminar sesion", 220, 40) {
-                    controller.navigate(route= AppScreens.Home.name)
-                    Toast.makeText(context, "Sesión finalizada y registrada", Toast.LENGTH_LONG).show()
 
+            // --- Tarjetas de Datos (Fila Superior) ---
+            Row(modifier = Modifier.height(280.dp).padding(horizontal = 10.dp)) {
+                // Tarjeta Movimiento
+                ElevatedCard(modifier = Modifier.weight(1f).padding(5.dp).fillMaxHeight()) {
+                    Column(
+                        modifier = Modifier.padding(10.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Text("Movimiento", fontSize = 23.sp, fontWeight = FontWeight.Black, color = rojoGranada)
+
+                        DatoResumen("Tiempo", "00:00 min")
+                        DatoResumen("Distancia", "0 m")
+                        DatoResumen("Velocidad", "0.0 km/h")
+                    }
+                }
+                // Tarjeta Sesión
+                ElevatedCard(modifier = Modifier.weight(1f).padding(5.dp).fillMaxHeight()) {
+                    Column(
+                        modifier = Modifier.padding(10.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Text("Sesión", fontSize = 23.sp, fontWeight = FontWeight.Black, color = rojoGranada)
+
+                        DatoResumen("# Ejercicios", "x")
+                        DatoResumen("Calorías", "0 Kcal")
+                    }
+                }
+            }
+            Text(
+                "Altitud durante el entrenamiento",
+                modifier = Modifier.padding(start = 20.dp, top = 20.dp, bottom = 10.dp),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray
+            )
+
+            ElevatedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(horizontal = 15.dp),
+                colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+                    val spacing = size.width / historialPresion.size
+                    val barWidth = spacing * 0.6f
+                    val maxVal = historialPresion.maxOrNull() ?: 1f
+
+                    historialPresion.forEachIndexed { index, value ->
+                        val barHeight = (value / maxVal) * size.height
+                        drawRoundRect(
+                            color = rojoGranada,
+                            topLeft = Offset(index * spacing, size.height - barHeight),
+                            size = Size(barWidth, barHeight),
+                            cornerRadius = CornerRadius(4.dp.toPx())
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                DefaulButton("Terminar sesión", 220, 40) {
+                    controller.navigate(route = AppScreens.Home.name)
+                    Toast.makeText(context, "Sesión finalizada y registrada", Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 }
 
+// Función auxiliar para no repetir tanto código de texto
+@Composable
+fun DatoResumen(label: String, value: String) {
+    Column(modifier= Modifier.padding(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, fontSize = 23.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+        Text(value, fontSize = 25.sp, fontWeight = FontWeight.Bold, color = colorResource(R.color.rojoGranada))
+    }
+}

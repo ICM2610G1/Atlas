@@ -1,32 +1,16 @@
 package com.example.atlas.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
-import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,32 +28,37 @@ import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
 
+data class Actividad(
+    val nombre: String,
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetallesTrote(controller: NavController) {
 
-    val rojoGranada = colorResource(R.color.rojoGranada)
+
+    val activityOptions = listOf(
+        Actividad("Trote"),
+        Actividad("Ciclismo"),
+        Actividad("Senderismo")
+    )
+
+    var selectedActivity by remember { mutableStateOf<String?>(null) }
+    var lugarInicio by remember { mutableStateOf("") }
+    var lugarFinal by remember { mutableStateOf("") }
 
     Scaffold(
         containerColor = colorResource(R.color.pink),
-        topBar = { DefaultTopAppBar("Detalles de trote") },
+        topBar = { DefaultTopAppBar("Detalles de actividad") },
         bottomBar = { DefaultBottomBarDep(R.color.white, controller) }
     ) { paddingValues ->
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.Top
         ) {
-
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .padding(top = 8.dp, bottom = 12.dp),
+                modifier = Modifier.fillMaxWidth().height(160.dp).padding(top = 8.dp, bottom = 16.dp),
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Start
             ) {
@@ -79,154 +68,147 @@ fun DetallesTrote(controller: NavController) {
                     contentScale = ContentScale.FillHeight,
                     modifier = Modifier.fillMaxHeight()
                 )
-
-                Box(
-                    modifier = Modifier
-                        .size(250.dp)
-                ) {
-
+                Box(modifier = Modifier.size(230.dp)) {
                     Image(
                         painter = painterResource(R.drawable.burbujadialogo),
                         contentDescription = "Dialogo",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.FillBounds
                     )
-
                     Text(
-                        text = "¡Rugido de victoria! Has terminado",
-                        color = rojoGranada,
+                        text = "¿Que actividad vas a realizar?",
+                        color = colorResource(R.color.rojoGranada),
                         fontSize = 18.sp,
+                        modifier = Modifier.align(Alignment.Center).padding(horizontal = 32.dp, vertical = 60.dp),
+                        textAlign = TextAlign.Center)
+                }
+            }
+            Text(
+                text = "Tipo de actividad",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
+
+            activityOptions.forEach { actividad ->
+                val isSelected = selectedActivity == actividad.nombre
+                ElevatedCard(
+                    onClick = { selectedActivity = actividad.nombre },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    shape = RoundedCornerShape(14.dp),
+                ) {
+                    Row(
                         modifier = Modifier
-                            .align(Alignment.Center)
-                            .padding(horizontal = 32.dp, vertical = 60.dp),
-                        textAlign = TextAlign.Center
-                    )
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.puma),
+                                    contentDescription = actividad.nombre,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                            Text(
+                                text = actividad.nombre,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 16.sp,
+                                color = if (isSelected) colorResource(R.color.rojoGranada) else Color.Black,
+                                modifier = Modifier.padding(start = 12.dp)
+                            )
+                        }
+                        RadioButton(
+                            selected = isSelected,
+                            onClick = { selectedActivity = actividad.nombre },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = colorResource(R.color.rojoGranada),
+                                unselectedColor = colorResource(R.color.rojoGranada)
+                            )
+                        )
+                    }
                 }
             }
 
-            InfoCardAtlas(
-                icon = {
-                    Icon(
-                        Icons.Outlined.ShoppingCart,
-                        contentDescription = null,
-                        tint = rojoGranada
-                    )
-                },
-                title = "Hora de inicio",
-                subtitle = "6:30 AM",
-                accent = rojoGranada,
-                modifier = Modifier.padding(bottom = 12.dp)
+            Text(
+                text = "Ruta",
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 10.dp)
             )
 
-            InfoCardAtlas(
-                icon = {
-                    Icon(
-                        Icons.Outlined.ShoppingCart,
-                        contentDescription = null,
-                        tint = rojoGranada
-                    )
-                },
-                title = "Duración",
-                subtitle = "75 minutos",
-                accent = rojoGranada,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            InfoCardAtlas(
-                icon = {
+            OutlinedTextField(
+                value = lugarInicio,
+                onValueChange = { lugarInicio = it },
+                label = { Text("Lugar de inicio") },
+                leadingIcon = {
                     Icon(
                         Icons.Outlined.LocationOn,
                         contentDescription = null,
-                        tint = rojoGranada
+                        tint = colorResource(R.color.rojoGranada)
                     )
                 },
-                title = "Lugar de inicio",
-                subtitle = "Parque Virrey (Carrera 15)",
-                accent = rojoGranada,
-                modifier = Modifier.padding(bottom = 12.dp)
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(R.color.rojoGranada),
+                    unfocusedBorderColor =colorResource(R.color.rojoGranada),
+                    focusedLabelColor = colorResource(R.color.rojoGranada),
+                    unfocusedContainerColor = Color.White,
+                    focusedContainerColor = Color.White
+                ),
+                singleLine = true
             )
 
-            InfoCardAtlas(
-                icon = {
+            OutlinedTextField(
+                value = lugarFinal,
+                onValueChange = { lugarFinal = it },
+                label = { Text("Lugar de destino") },
+                leadingIcon = {
                     Icon(
                         Icons.Outlined.LocationOn,
                         contentDescription = null,
-                        tint = rojoGranada
+                        tint = colorResource(R.color.rojoGranada)
                     )
                 },
-                title = "Lugar final",
-                subtitle = "Parque de la 93",
-                accent = rojoGranada,
-                modifier = Modifier.padding(bottom = 20.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(R.color.rojoGranada),
+                    unfocusedBorderColor = colorResource(R.color.rojoGranada),
+                    focusedLabelColor = colorResource(R.color.rojoGranada),
+                    unfocusedContainerColor = Color.White,
+                    focusedContainerColor = Color.White
+                ),
+                singleLine = true
             )
 
             Button(
-                onClick = {controller.navigate(route= AppScreens.crearSesion.name)},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp)
-                    .padding(bottom = 24.dp),
+                onClick = { controller.navigate(route = AppScreens.Mimapa.name + "/${lugarInicio}/${lugarFinal}/${selectedActivity}") },
+                enabled = selectedActivity != null && lugarInicio.isNotBlank() && lugarFinal.isNotBlank(),
+                modifier = Modifier.fillMaxWidth().height(52.dp).padding(bottom = 4.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = rojoGranada,
-                    contentColor = Color.White
+                    containerColor = colorResource(R.color.rojoGranada),
+                    contentColor = Color.White,
+                    disabledContainerColor = colorResource(R.color.rojoGranada),
+                    disabledContentColor = Color.White
                 )
             ) {
                 Text(
                     text = "Confirmar",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun InfoCardAtlas(
-    icon: @Composable () -> Unit,
-    title: String,
-    subtitle: String,
-    accent: Color,
-    modifier: Modifier = Modifier
-) {
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = Color.White),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                icon()
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 14.dp)
-            ) {
-                Text(
-                    text = title,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    fontSize = 16.sp
-                )
-                Text(
-                    text = subtitle,
-                    color = Color.Gray,
-                    fontSize = 13.sp
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }

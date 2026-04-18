@@ -61,16 +61,11 @@ fun CrearNuevaSesion(controller: NavController) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .padding(15.dp)
+                modifier = Modifier.fillMaxWidth().height(180.dp).padding(15.dp)
             ) {
 
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
+                    modifier = Modifier.weight(1f).fillMaxHeight()
                 ) {
                     Image(
                         painter = painterResource(R.drawable.burbujadialogo),
@@ -118,7 +113,7 @@ fun CrearNuevaSesion(controller: NavController) {
                     ) {
                         Image(painterResource(R.drawable.oso_trote), null, Modifier.size(100.dp))
                         Text(
-                            "Sesión de trote",
+                            "Actividad en movimiento",
                             fontWeight = FontWeight.Bold,
                             color = colorResource(R.color.rojoGranada),
                             textAlign = TextAlign.Center
@@ -126,7 +121,8 @@ fun CrearNuevaSesion(controller: NavController) {
                         RadioButton(
                             selected = troteSeleccionado,
                             onClick = null,
-                            colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.rojoGranada))
+                            colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.rojoGranada)),
+                            modifier= Modifier.padding(10.dp)
                         )
                     }
                 }
@@ -145,7 +141,7 @@ fun CrearNuevaSesion(controller: NavController) {
                     ) {
                         Image(painterResource(R.drawable.oso_gym), null, Modifier.size(100.dp))
                         Text(
-                            "Ejercicio/Gym",
+                            "Actividad\n Anaerobica",
                             fontWeight = FontWeight.Bold,
                             color = colorResource(R.color.rojoGranada),
                             textAlign = TextAlign.Center
@@ -153,7 +149,8 @@ fun CrearNuevaSesion(controller: NavController) {
                         RadioButton(
                             selected = gymSeleccionado,
                             onClick = null,
-                            colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.rojoGranada))
+                            colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.rojoGranada)),
+                            modifier= Modifier.padding(10.dp)
                         )
                     }
                 }
@@ -163,7 +160,7 @@ fun CrearNuevaSesion(controller: NavController) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                DefaulButton("Programar sesion", 220, 40) {
+                DefaulButton("Terminar sesión", 220, 40) {
                     Log.i("TAGInicio", "Click Iniciar ")
                     controller.navigate(route = AppScreens.ChequeoSesion.name)
                 }

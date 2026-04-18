@@ -99,13 +99,10 @@ fun ChequeoSesion(controller: NavController) {
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Datos del ejercicio
                     Column {
                         Text("Sentadilla con Barra", color = colorResource(R.color.rojoGranada), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                         Spacer(modifier = Modifier.height(16.dp))
@@ -133,9 +130,6 @@ fun ChequeoSesion(controller: NavController) {
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -176,24 +170,6 @@ fun ChequeoSesion(controller: NavController) {
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-
-                DefaulButton(text = "Iniciar trote", ancho = 150, alto = 50) {
-                    /* Acción iniciar trote */
-                }
-                DefaulButton(text = "Terminar trote", ancho = 150, alto = 50) {
-                    /* Acción terminar trote */
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             DefaulButton(text = "Terminar sesion", ancho = 240, alto = 50) {
                 controller.navigate(route= AppScreens.resumenSesion.name)
