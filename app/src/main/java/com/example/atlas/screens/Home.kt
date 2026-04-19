@@ -78,7 +78,7 @@ fun Home (controller : NavController){
                 icono_circulo(R.drawable.mapa, "Ubicacion")
                 DefaulButton("Nueva Sesión", 220, 40) {
                     Log.i("TAGNuevaSesion", "Click NuevaSesion")
-                    controller.navigate(route = AppScreens.crearSesion.name)
+                    controller.navigate(route = AppScreens.detallesTrote.name)
                 }
             }
             Row(

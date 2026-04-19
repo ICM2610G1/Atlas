@@ -43,7 +43,6 @@ fun CrearNuevaSesion(controller: NavController) {
     var gymSeleccionado by remember { mutableStateOf(false) }
 
     Scaffold(
-        //Se usa para poner el color de fondo de la pantalla
         containerColor = colorResource(R.color.pink),
         topBar = { DefaultTopAppBar("Crear nueva sesión") },
         bottomBar = {

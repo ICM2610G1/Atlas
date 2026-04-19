@@ -1,8 +1,6 @@
 package com.example.atlas.screens
 
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,14 +44,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.example.atlas.R
 import com.example.atlas.auth
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.navegation.AppScreens
 import com.example.atlas.sensores.HelperBiometrico
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.atlas.ui.theme.AtlasTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -94,19 +89,6 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
 
     // HelperBiometrico
     val helperBiometrico = remember { HelperBiometrico(context) }
-
-    // ActivityResult API
-    val lanzadorBiometrico = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { concedido ->
-        if (concedido) {
-            if (state.email.lowercase().contains("entrenador")) {
-                controller.navigate(route = AppScreens.HomeCoach.name)
-            } else {
-                controller.navigate(route = AppScreens.Home.name)
-            }
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -232,8 +214,17 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
                     ) {
                         IconButton(
                             onClick = {
-                                lanzadorBiometrico.launch(
-                                    android.Manifest.permission.USE_BIOMETRIC
+                                helperBiometrico.autenticar(
+                                    alAutenticar = {
+                                        if (state.email.lowercase().contains("entrenador")) {
+                                            controller.navigate(route = AppScreens.HomeCoach.name)
+                                        } else {
+                                            controller.navigate(route = AppScreens.Home.name)
+                                        }
+                                    },
+                                    alFallar = { mensaje ->
+                                        Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
+                                    }
                                 )
                             }
                         ) {
@@ -244,11 +235,7 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
                                 modifier = Modifier.size(52.dp)
                             )
                         }
-                        Text(
-                            text = "Ingresar con huella",
-                            color = colorResource(R.color.rojoGranada),
-                            fontSize = 14.sp
-                        )
+                        Text("Ingresar con huella", color = colorResource(R.color.rojoGranada), fontSize = 14.sp)
                     }
                 }
             }

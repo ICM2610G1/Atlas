@@ -19,8 +19,6 @@ class ModeloPerfilEnt : ViewModel() {
     fun actualizarAnios(valor: String) = _estado.update { it.copy(aniosEjerciendo = valor) }
     fun actualizarEspecialidad(valor: String) = _estado.update { it.copy(especialidad = valor) }
     fun actualizarSobreTi(valor: String) = _estado.update { it.copy(sobreTi = valor) }
-
-    // Foto — patrón ActivityResult API Sesión 5
     fun guardarFotoCamara(uri: Uri) = _estado.update { it.copy(uriImagen = uri) }
     fun guardarFotoGaleria(uri: Uri?) = _estado.update { it.copy(uriImagen = uri) }
 }

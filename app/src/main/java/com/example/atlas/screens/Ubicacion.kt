@@ -39,29 +39,36 @@ fun Ubicacion(
     val estado by modelo.estado.collectAsState()
     val contexto = LocalContext.current
 
-    // ── Sensor de luminosidad ─────────────────────────────────────────────
+    // Sensor de luminosidad
     val sensorManager = contexto.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val sensorLuz: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-
     var esOscuro by remember { mutableStateOf(false) }
 
-    val listenerLuz = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent?) {
-            if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
-                esOscuro = event.values[0] < 2000
+    val listenerLuz = remember {
+        object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
+                    esOscuro = event.values[0] < 50
+                }
             }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
     }
 
     DisposableEffect(Unit) {
-        sensorManager.registerListener(
-            listenerLuz,
-            sensorLuz,
-            SensorManager.SENSOR_DELAY_NORMAL
-        )
-        onDispose {
-            sensorManager.unregisterListener(listenerLuz)
+        sensorManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_NORMAL)
+        onDispose { sensorManager.unregisterListener(listenerLuz) }
+    }
+
+    val mapViewRef = remember { mutableStateOf<MapView?>(null) }
+
+    // Solo cambia la capa cuando cambia esOscuro
+    LaunchedEffect(esOscuro) {
+        mapViewRef.value?.let { mapView ->
+            mapView.setTileSource(
+                if (esOscuro) TileSourceFactory.USGS_TOPO else TileSourceFactory.MAPNIK
+            )
+            mapView.invalidate()
         }
     }
 
@@ -74,7 +81,6 @@ fun Ubicacion(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -87,31 +93,29 @@ fun Ubicacion(
                             ctx,
                             ctx.getSharedPreferences("osmdroid", Context.MODE_PRIVATE)
                         )
+                        Configuration.getInstance().userAgentValue = ctx.packageName
                         MapView(ctx).apply {
                             setTileSource(TileSourceFactory.MAPNIK)
                             setMultiTouchControls(true)
-                            this.controller.setZoom(15.0)
+                            controller.setZoom(15.0)
+                            // Guardar referencia para LaunchedEffect del sensor
+                            mapViewRef.value = this
                         }
                     },
                     update = { mapView ->
-                        val posicion = GeoPoint(estado.latitud, estado.longitud)
-
-                        mapView.setTileSource(
-                            if (esOscuro) TileSourceFactory.USGS_TOPO
-                            else TileSourceFactory.MAPNIK
-                        )
-
-                        mapView.controller.setCenter(posicion)
-
-                        mapView.overlays.clear()
-                        val marcador = Marker(mapView).apply {
-                            position = posicion
-                            title = estado.nombreDeportista
-                            snippet = estado.direccion
-                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        if (estado.latitud != 0.0 || estado.longitud != 0.0) {
+                            val posicion = GeoPoint(estado.latitud, estado.longitud)
+                            mapView.controller.setCenter(posicion)
+                            mapView.overlays.clear()
+                            val marcador = Marker(mapView).apply {
+                                position = posicion
+                                title = estado.nombreDeportista
+                                snippet = estado.direccion
+                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            }
+                            mapView.overlays.add(marcador)
+                            mapView.invalidate()
                         }
-                        mapView.overlays.add(marcador)
-                        mapView.invalidate()
                     }
                 )
             }
@@ -127,7 +131,7 @@ fun Ubicacion(
                         .fillMaxWidth()
                         .padding(15.dp)
                 ) {
-                    Box(modifier = Modifier) {
+                    Box {
                         Icon(
                             Icons.Default.AccountCircle,
                             "Símbolo de persona",
@@ -145,11 +149,7 @@ fun Ubicacion(
                         verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        Text(
-                            estado.nombreDeportista,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(estado.nombreDeportista, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                         Text("Ubicación: ${estado.direccion}", fontSize = 12.sp)
                         Text("Distancia recorrida: ${estado.distanciaKm} km", fontSize = 12.sp)
                     }

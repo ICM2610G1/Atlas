@@ -4,27 +4,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.atlas.elements.ScaffoldDesign
 import com.example.atlas.navegation.Navigation
-import com.example.atlas.ui.theme.AtlasTheme
 import com.google.firebase.auth.FirebaseAuth
+import org.osmdroid.config.Configuration
+import java.io.File
 
 lateinit var auth : FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Configuración global de OSM
+        Configuration.getInstance().apply {
+            userAgentValue = packageName
+            osmdroidBasePath = getExternalFilesDir(null)
+            osmdroidTileCache = File(getExternalFilesDir(null), "tiles")
+            load(applicationContext, getSharedPreferences("osmdroid", MODE_PRIVATE))
+        }
+
         enableEdgeToEdge()
         setContent {
             auth = FirebaseAuth.getInstance()
-            Navigation();
+            Navigation()
         }
     }
 }

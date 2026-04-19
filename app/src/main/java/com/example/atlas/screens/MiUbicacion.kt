@@ -49,47 +49,37 @@ fun MiUbicacion(
     val estado by modelo.estado.collectAsState()
     val contexto = LocalContext.current
 
-    // ── Sensor de luminosidad ─────────────────────────────────────────────
-    // Patrón SensorManager + DisposableEffect de Sesión 9
+    // Sensor de luminosidad
     val sensorManager = contexto.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val sensorLuz: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
-
     var esOscuro by remember { mutableStateOf(false) }
 
-    val listenerLuz = object : SensorEventListener {
-        override fun onSensorChanged(event: SensorEvent?) {
-            if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
-                esOscuro = event.values[0] < 2000
+    val listenerLuz = remember {
+        object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
+                    esOscuro = event.values[0] < 50
+                }
             }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
     }
 
     DisposableEffect(Unit) {
-        sensorManager.registerListener(
-            listenerLuz,
-            sensorLuz,
-            SensorManager.SENSOR_DELAY_NORMAL
-        )
-        onDispose {
-            sensorManager.unregisterListener(listenerLuz)
-        }
+        sensorManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_NORMAL)
+        onDispose { sensorManager.unregisterListener(listenerLuz) }
     }
 
-    // ── GPS del deportista ────────────────────────────────────────────────
-    // Patrón FusedLocationProvider + DisposableEffect de Sesión 7
+    // GPS del deportista
     val locationClient = LocationServices.getFusedLocationProviderClient(contexto)
 
-    val locationRequest = LocationRequest.Builder(
-        Priority.PRIORITY_HIGH_ACCURACY, 10000L
-    )
+    val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L)
         .setWaitForAccurateLocation(true)
         .setMinUpdateIntervalMillis(5000L)
         .build()
 
     val locationCallback = createLocationCallback { result ->
         result.lastLocation?.let { location ->
-            // Primera lectura → registrar punto de inicio
             if (estado.latInicio == 0.0 && estado.lngInicio == 0.0) {
                 modelo.registrarInicio(location.latitude, location.longitude)
             }
@@ -103,18 +93,24 @@ fun MiUbicacion(
                 contexto, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            locationClient.requestLocationUpdates(
-                locationRequest,
-                locationCallback,
-                Looper.getMainLooper()
-            )
+            locationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
         }
-        onDispose {
-            locationClient.removeLocationUpdates(locationCallback)
+        onDispose { locationClient.removeLocationUpdates(locationCallback) }
+    }
+
+    val mapViewRef = remember { mutableStateOf<MapView?>(null) }
+
+    // Cambia la capa del mapa cuando cambia esOscuro
+    LaunchedEffect(esOscuro) {
+        mapViewRef.value?.let { mapView ->
+            mapView.setTileSource(
+                if (esOscuro) TileSourceFactory.USGS_TOPO else TileSourceFactory.MAPNIK
+            )
+            mapView.invalidate()
         }
     }
 
-    // UI
+    // ── UI
     Scaffold(
         topBar = { DefaultTopAppBar("Monitoreo y ubicación de tu actividad") },
         bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, navController) }
@@ -125,7 +121,7 @@ fun MiUbicacion(
                 .padding(paddingValues)
         ) {
 
-            // Mapa OpenStreetMap — mismo patrón AndroidView que Ubicacion.kt
+            // Mapa OpenStreetMap
             Box(
                 modifier = Modifier
                     .weight(2f)
@@ -138,36 +134,33 @@ fun MiUbicacion(
                             ctx,
                             ctx.getSharedPreferences("osmdroid", Context.MODE_PRIVATE)
                         )
+                        Configuration.getInstance().userAgentValue = ctx.packageName
                         MapView(ctx).apply {
                             setTileSource(TileSourceFactory.MAPNIK)
                             setMultiTouchControls(true)
-                            this.controller.setZoom(15.0)
+                            controller.setZoom(13.0)
+                            mapViewRef.value = this
                         }
                     },
                     update = { mapView ->
-                        val posicion = GeoPoint(estado.latitud, estado.longitud)
-
-                        mapView.setTileSource(
-                            if (esOscuro) TileSourceFactory.USGS_TOPO
-                            else TileSourceFactory.MAPNIK
-                        )
-
-                        mapView.controller.setCenter(posicion)
-
-                        mapView.overlays.clear()
-                        val marcador = Marker(mapView).apply {
-                            position = posicion
-                            title = "Mi ubicación"
-                            snippet = estado.direccionActual
-                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        if (estado.latitud != 0.0 || estado.longitud != 0.0) {
+                            val posicion = GeoPoint(estado.latitud, estado.longitud)
+                            mapView.controller.setCenter(posicion)
+                            mapView.overlays.clear()
+                            val marcador = Marker(mapView).apply {
+                                position = posicion
+                                title = "Mi ubicación"
+                                snippet = estado.direccionActual
+                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            }
+                            mapView.overlays.add(marcador)
+                            mapView.invalidate()
                         }
-                        mapView.overlays.add(marcador)
-                        mapView.invalidate()
                     }
                 )
             }
 
-            // Tarjeta de datos — UI original preservada
+            // Tarjeta de datos
             ElevatedCard(
                 modifier = Modifier
                     .padding(vertical = 15.dp, horizontal = 30.dp)
@@ -216,7 +209,7 @@ fun MiUbicacion(
                 }
             }
 
-            // Botón finalizar — navega a crearSesion igual que el original
+            // Botón finalizar
             Column(
                 modifier = Modifier
                     .weight(1f)
