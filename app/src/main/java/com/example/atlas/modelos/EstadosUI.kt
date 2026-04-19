@@ -73,3 +73,30 @@ data class EstadoMiUbicacion(
     val latInicio: Double = 0.0,
     val lngInicio: Double = 0.0
 )
+
+data class Authstate(
+    val email: String = "",
+    val password: String = "",
+    val emailError: String = "",
+    val passwordError: String = ""
+)
+
+data class EstadoPerfil(
+    val usuario: String = "",
+    val telefono: String = "",
+    val correo: String = "",
+    val peso: String = "",
+    val estatura: String = "",
+    val obMedicas: String = "",
+    val uriImagen: android.net.Uri? = null
+)
+
+data class EstadoPerfilEnt(
+    val usuario: String = "",
+    val telefono: String = "",
+    val correo: String = "",
+    val aniosEjerciendo: String = "",
+    val especialidad: String = "",
+    val sobreTi: String = "",
+    val uriImagen: android.net.Uri? = null
+)
