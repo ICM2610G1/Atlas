@@ -182,7 +182,20 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                         )
                     }
                 },
-                value = state.fecha, onValueChange = {model.updateFecha(it)}, placeholder = {Text("Fecha")},
+                value = state.fecha, onValueChange = { input ->
+                    val cleaned = input.filter { it.isDigit() }.take(8)
+
+                    val formatted = buildString {
+                        cleaned.forEachIndexed { i, c ->
+                            append(c)
+                            if ((i == 1 || i == 3) && i != cleaned.lastIndex) {
+                                append("/")
+                            }
+                        }
+                    }
+
+                    model.updateFecha(formatted)
+                }, placeholder = {Text("Fecha")},
                 modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).weight(2F),
                 shape = RoundedCornerShape(14.dp),
                 colors = TextFieldDefaults.colors(
