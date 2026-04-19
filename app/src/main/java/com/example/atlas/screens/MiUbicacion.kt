@@ -21,6 +21,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -31,14 +32,15 @@ import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
 import com.example.atlas.viewmodels.ModeloMiUbicacion
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.maps.android.compose.*
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 @Composable
 fun MiUbicacion(
-    controller: NavController,
+    navController: NavController,
     inicio: String,
     final: String,
     actividad: String,
@@ -47,19 +49,17 @@ fun MiUbicacion(
     val estado by modelo.estado.collectAsState()
     val contexto = LocalContext.current
 
-    // Sensor de luminosidad
+    // ── Sensor de luminosidad ─────────────────────────────────────────────
+    // Patrón SensorManager + DisposableEffect de Sesión 9
     val sensorManager = contexto.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val sensorLuz: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
 
-    val mapaClaro = MapStyleOptions.loadRawResourceStyle(contexto, R.raw.mapa_claro)
-    val mapaOscuro = MapStyleOptions.loadRawResourceStyle(contexto, R.raw.mapa_oscuro)
-    var estiloActual by remember { mutableStateOf(mapaClaro) }
+    var esOscuro by remember { mutableStateOf(false) }
 
     val listenerLuz = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
             if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
-                val lux = event.values[0]
-                estiloActual = if (lux < 2000) mapaOscuro else mapaClaro
+                esOscuro = event.values[0] < 2000
             }
         }
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -76,6 +76,8 @@ fun MiUbicacion(
         }
     }
 
+    // ── GPS del deportista ────────────────────────────────────────────────
+    // Patrón FusedLocationProvider + DisposableEffect de Sesión 7
     val locationClient = LocationServices.getFusedLocationProviderClient(contexto)
 
     val locationRequest = LocationRequest.Builder(
@@ -87,7 +89,7 @@ fun MiUbicacion(
 
     val locationCallback = createLocationCallback { result ->
         result.lastLocation?.let { location ->
-            // Primera actualización → registrar punto de inicio
+            // Primera lectura → registrar punto de inicio
             if (estado.latInicio == 0.0 && estado.lngInicio == 0.0) {
                 modelo.registrarInicio(location.latitude, location.longitude)
             }
@@ -112,18 +114,10 @@ fun MiUbicacion(
         }
     }
 
-    val posActual = LatLng(estado.latitud, estado.longitud)
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(posActual, 15f)
-    }
-
-    LaunchedEffect(estado.latitud, estado.longitud) {
-        cameraPositionState.position = CameraPosition.fromLatLngZoom(posActual, 15f)
-    }
-
+    // UI
     Scaffold(
         topBar = { DefaultTopAppBar("Monitoreo y ubicación de tu actividad") },
-        bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, controller) }
+        bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, navController) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -131,36 +125,54 @@ fun MiUbicacion(
                 .padding(paddingValues)
         ) {
 
-            // Mapa Google
+            // Mapa OpenStreetMap — mismo patrón AndroidView que Ubicacion.kt
             Box(
                 modifier = Modifier
                     .weight(2f)
                     .padding(horizontal = 30.dp, vertical = 15.dp)
             ) {
-                GoogleMap(
+                AndroidView(
                     modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState,
-                    properties = MapProperties(mapStyleOptions = estiloActual),
-                    uiSettings = MapUiSettings(
-                        zoomControlsEnabled = true,
-                        compassEnabled = true
-                    )
-                ) {
-                    // Marcador de posición del deportista
-                    Marker(
-                        state = rememberMarkerState(position = posActual),
-                        title = "Mi ubicación",
-                        snippet = estado.direccionActual
-                    )
-                }
+                    factory = { ctx ->
+                        Configuration.getInstance().load(
+                            ctx,
+                            ctx.getSharedPreferences("osmdroid", Context.MODE_PRIVATE)
+                        )
+                        MapView(ctx).apply {
+                            setTileSource(TileSourceFactory.MAPNIK)
+                            setMultiTouchControls(true)
+                            this.controller.setZoom(15.0)
+                        }
+                    },
+                    update = { mapView ->
+                        val posicion = GeoPoint(estado.latitud, estado.longitud)
+
+                        mapView.setTileSource(
+                            if (esOscuro) TileSourceFactory.USGS_TOPO
+                            else TileSourceFactory.MAPNIK
+                        )
+
+                        mapView.controller.setCenter(posicion)
+
+                        mapView.overlays.clear()
+                        val marcador = Marker(mapView).apply {
+                            position = posicion
+                            title = "Mi ubicación"
+                            snippet = estado.direccionActual
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        }
+                        mapView.overlays.add(marcador)
+                        mapView.invalidate()
+                    }
+                )
             }
 
-            // Tarjeta de datos de la actividad
+            // Tarjeta de datos — UI original preservada
             ElevatedCard(
                 modifier = Modifier
                     .padding(vertical = 15.dp, horizontal = 30.dp)
                     .weight(0.7f),
-                colors = CardDefaults.cardColors(colorResource(R.color.pink))
+                colors = CardDefaults.cardColors(containerColor = colorResource(R.color.pink))
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
@@ -187,7 +199,6 @@ fun MiUbicacion(
                         verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        // Dirección resuelta por Geocoder
                         Text(
                             estado.direccionActual,
                             fontSize = 14.sp,
@@ -205,7 +216,7 @@ fun MiUbicacion(
                 }
             }
 
-            // Botón finalizar
+            // Botón finalizar — navega a crearSesion igual que el original
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -213,7 +224,7 @@ fun MiUbicacion(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 DefaulButton("Finalizar actividad", 220, 40) {
-                    controller.navigate(route = AppScreens.crearSesion.name)
+                    navController.navigate(route = AppScreens.crearSesion.name)
                 }
             }
         }
