@@ -8,6 +8,9 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Looper
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
@@ -85,6 +88,27 @@ fun MiUbicacion(
             }
             modelo.actualizarPosicion(location.latitude, location.longitude)
             modelo.resolverDireccion(contexto, location.latitude, location.longitude)
+        }
+    }
+
+    val lanzadorPermisoUbicacion = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (!concedido) {
+            Toast.makeText(
+                contexto,
+                "Se requiere permiso de ubicación para monitorear la actividad",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (ContextCompat.checkSelfPermission(
+                contexto, Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            lanzadorPermisoUbicacion.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
