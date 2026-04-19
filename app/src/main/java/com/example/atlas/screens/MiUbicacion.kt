@@ -1,12 +1,10 @@
 package com.example.atlas.screens
 
 import android.Manifest
-import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
-import android.hardware.SensorManager
+import android.content.pm.PackageManager
 import android.os.Looper
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,7 +22,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -33,13 +30,14 @@ import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
+import com.example.atlas.sensorManager
 import com.example.atlas.viewmodels.ModeloMiUbicacion
 import com.google.android.gms.location.*
-import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.maps.android.compose.*
 
 @Composable
 fun MiUbicacion(
@@ -53,15 +51,16 @@ fun MiUbicacion(
     val contexto = LocalContext.current
 
     // Sensor de luminosidad
-    val sensorManager = contexto.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    val sensorLuz: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+    val sensorLuz = remember {
+        sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+    }
     var esOscuro by remember { mutableStateOf(false) }
 
     val listenerLuz = remember {
         object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent?) {
                 if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
-                    esOscuro = event.values[0] < 50
+                    esOscuro = event.values[0] < 2000
                 }
             }
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -69,8 +68,16 @@ fun MiUbicacion(
     }
 
     DisposableEffect(Unit) {
-        sensorManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(listenerLuz, sensorLuz, android.hardware.SensorManager.SENSOR_DELAY_NORMAL)
         onDispose { sensorManager.unregisterListener(listenerLuz) }
+    }
+
+    // Estilo del mapa según luminosidad
+    val estiloMapa = remember(esOscuro) {
+        MapStyleOptions.loadRawResourceStyle(
+            contexto,
+            if (esOscuro) R.raw.mapa_oscuro else R.raw.mapa_claro
+        )
     }
 
     // GPS del deportista
@@ -91,6 +98,7 @@ fun MiUbicacion(
         }
     }
 
+    // Permiso de ubicación
     val lanzadorPermisoUbicacion = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { concedido ->
@@ -117,20 +125,31 @@ fun MiUbicacion(
                 contexto, Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            locationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+            locationClient.requestLocationUpdates(
+                locationRequest, locationCallback, Looper.getMainLooper()
+            )
         }
         onDispose { locationClient.removeLocationUpdates(locationCallback) }
     }
 
-    val mapViewRef = remember { mutableStateOf<MapView?>(null) }
+    // Marcadores de origen y destino
+    LaunchedEffect(inicio, final) {
+        if (inicio.isNotBlank()) modelo.resolverOrigen(inicio)
+        if (final.isNotBlank()) modelo.resolverDestino(final)
+    }
 
-    // Cambia la capa del mapa cuando cambia esOscuro
-    LaunchedEffect(esOscuro) {
-        mapViewRef.value?.let { mapView ->
-            mapView.setTileSource(
-                if (esOscuro) TileSourceFactory.USGS_TOPO else TileSourceFactory.MAPNIK
+    // Cámara del mapa
+    val posicionCamara = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(LatLng(4.627293, -74.063228), 13f)
+    }
+
+    LaunchedEffect(estado.latitud, estado.longitud) {
+        if (estado.latitud != 0.0 || estado.longitud != 0.0) {
+            posicionCamara.animate(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(estado.latitud, estado.longitud), 15f
+                )
             )
-            mapView.invalidate()
         }
     }
 
@@ -144,47 +163,55 @@ fun MiUbicacion(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-
-            // Mapa OpenStreetMap
             Box(
                 modifier = Modifier
                     .weight(2f)
                     .padding(horizontal = 30.dp, vertical = 15.dp)
             ) {
-                AndroidView(
+                GoogleMap(
                     modifier = Modifier.fillMaxSize(),
-                    factory = { ctx ->
-                        Configuration.getInstance().load(
-                            ctx,
-                            ctx.getSharedPreferences("osmdroid", Context.MODE_PRIVATE)
+                    cameraPositionState = posicionCamara,
+                    properties = MapProperties(
+                        mapStyleOptions = estiloMapa,
+                        isMyLocationEnabled = ContextCompat.checkSelfPermission(
+                            contexto, Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ),
+                    uiSettings = MapUiSettings(
+                        zoomControlsEnabled = true,
+                        myLocationButtonEnabled = true
+                    )
+                ) {
+                    if (estado.latitud != 0.0 || estado.longitud != 0.0) {
+                        Marker(
+                            state = MarkerState(
+                                position = LatLng(estado.latitud, estado.longitud)
+                            ),
+                            title = "Mi ubicación",
+                            snippet = estado.direccionActual
                         )
-                        Configuration.getInstance().userAgentValue = ctx.packageName
-                        MapView(ctx).apply {
-                            setTileSource(TileSourceFactory.MAPNIK)
-                            setMultiTouchControls(true)
-                            controller.setZoom(13.0)
-                            mapViewRef.value = this
-                        }
-                    },
-                    update = { mapView ->
-                        if (estado.latitud != 0.0 || estado.longitud != 0.0) {
-                            val posicion = GeoPoint(estado.latitud, estado.longitud)
-                            mapView.controller.setCenter(posicion)
-                            mapView.overlays.clear()
-                            val marcador = Marker(mapView).apply {
-                                position = posicion
-                                title = "Mi ubicación"
-                                snippet = estado.direccionActual
-                                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                            }
-                            mapView.overlays.add(marcador)
-                            mapView.invalidate()
-                        }
                     }
-                )
+
+                    // Marcador origen
+                    estado.posicionOrigen?.let {
+                        Marker(
+                            state = MarkerState(position = it),
+                            title = "Origen",
+                            snippet = inicio
+                        )
+                    }
+
+                    // Marcador destino
+                    estado.posicionDestino?.let {
+                        Marker(
+                            state = MarkerState(position = it),
+                            title = "Destino",
+                            snippet = final
+                        )
+                    }
+                }
             }
 
-            // Tarjeta de datos
             ElevatedCard(
                 modifier = Modifier
                     .padding(vertical = 15.dp, horizontal = 30.dp)
@@ -194,50 +221,29 @@ fun MiUbicacion(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(15.dp)
+                    modifier = Modifier.fillMaxWidth().padding(15.dp)
                 ) {
                     Box {
-                        Icon(
-                            Icons.Default.AccountCircle,
-                            "Símbolo de persona",
-                            modifier = Modifier.size(50.dp)
-                        )
-                        Icon(
-                            Icons.Default.CheckCircle,
-                            contentDescription = "Estado",
+                        Icon(Icons.Default.AccountCircle, "Símbolo de persona",
+                            modifier = Modifier.size(50.dp))
+                        Icon(Icons.Default.CheckCircle, contentDescription = "Estado",
                             modifier = Modifier.align(Alignment.BottomEnd),
-                            tint = colorResource(R.color.teal_700)
-                        )
+                            tint = colorResource(R.color.teal_700))
                     }
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        Text(
-                            estado.direccionActual,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            "Distancia recorrida: ${estado.distanciaRecorrida} km",
-                            fontSize = 12.sp
-                        )
-                        Text(
-                            "Actividad: $actividad",
-                            fontSize = 12.sp
-                        )
+                        Text(estado.direccionActual, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Text("Distancia recorrida: ${estado.distanciaRecorrida} km", fontSize = 12.sp)
+                        Text("Actividad: $actividad", fontSize = 12.sp)
                     }
                 }
             }
 
-            // Botón finalizar
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
+                modifier = Modifier.weight(1f).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 DefaulButton("Finalizar actividad", 220, 40) {

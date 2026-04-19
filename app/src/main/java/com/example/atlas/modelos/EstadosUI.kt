@@ -1,5 +1,7 @@
 package com.example.atlas.modelos
 
+import com.google.android.gms.maps.model.LatLng
+
 data class EstadoCalificar(
     val calificacion: Int = 0,
     val comentario: String = "",
@@ -66,12 +68,14 @@ data class EstadoUbicacion(
 )
 
 data class EstadoMiUbicacion(
-    val latitud: Double = 4.627293,
-    val longitud: Double = -74.063228,
-    val direccionActual: String = "Obteniendo ubicación...",
-    val distanciaRecorrida: Double = 0.0,
+    val latitud: Double = 0.0,
+    val longitud: Double = 0.0,
     val latInicio: Double = 0.0,
-    val lngInicio: Double = 0.0
+    val lngInicio: Double = 0.0,
+    val direccionActual: String = "",
+    val distanciaRecorrida: Double = 0.0,
+    val posicionOrigen: LatLng? = null,
+    val posicionDestino: LatLng? = null
 )
 
 data class Authstate(

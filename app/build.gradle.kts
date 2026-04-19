@@ -20,6 +20,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val mapsApiKey = project.findProperty("MAPS_API_KEY")?.toString() ?: ""
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
     buildTypes {
@@ -57,7 +60,8 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation(libs.osmdroid.android)
+    implementation(libs.maps.compose)
+    implementation("com.google.android.gms:play-services-maps:20.0.0")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)
