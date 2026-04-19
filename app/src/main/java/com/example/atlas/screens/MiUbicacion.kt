@@ -1,73 +1,178 @@
 package com.example.atlas.screens
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.Looper
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
-import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
+import com.example.atlas.viewmodels.ModeloMiUbicacion
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.maps.android.compose.*
 
 @Composable
-fun MiUbicacion (controller: NavController, inicio: String , final:String, actividad:String){
+fun MiUbicacion(
+    controller: NavController,
+    inicio: String,
+    final: String,
+    actividad: String,
+    modelo: ModeloMiUbicacion = viewModel()
+) {
+    val estado by modelo.estado.collectAsState()
+    val contexto = LocalContext.current
+
+    // Sensor de luminosidad
+    val sensorManager = contexto.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    val sensorLuz: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+
+    val mapaClaro = MapStyleOptions.loadRawResourceStyle(contexto, R.raw.mapa_claro)
+    val mapaOscuro = MapStyleOptions.loadRawResourceStyle(contexto, R.raw.mapa_oscuro)
+    var estiloActual by remember { mutableStateOf(mapaClaro) }
+
+    val listenerLuz = object : SensorEventListener {
+        override fun onSensorChanged(event: SensorEvent?) {
+            if (event?.sensor?.type == Sensor.TYPE_LIGHT) {
+                val lux = event.values[0]
+                estiloActual = if (lux < 2000) mapaOscuro else mapaClaro
+            }
+        }
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    }
+
+    DisposableEffect(Unit) {
+        sensorManager.registerListener(
+            listenerLuz,
+            sensorLuz,
+            SensorManager.SENSOR_DELAY_NORMAL
+        )
+        onDispose {
+            sensorManager.unregisterListener(listenerLuz)
+        }
+    }
+
+    val locationClient = LocationServices.getFusedLocationProviderClient(contexto)
+
+    val locationRequest = LocationRequest.Builder(
+        Priority.PRIORITY_HIGH_ACCURACY, 10000L
+    )
+        .setWaitForAccurateLocation(true)
+        .setMinUpdateIntervalMillis(5000L)
+        .build()
+
+    val locationCallback = createLocationCallback { result ->
+        result.lastLocation?.let { location ->
+            // Primera actualización → registrar punto de inicio
+            if (estado.latInicio == 0.0 && estado.lngInicio == 0.0) {
+                modelo.registrarInicio(location.latitude, location.longitude)
+            }
+            modelo.actualizarPosicion(location.latitude, location.longitude)
+            modelo.resolverDireccion(contexto, location.latitude, location.longitude)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        if (ContextCompat.checkSelfPermission(
+                contexto, Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            locationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+        }
+        onDispose {
+            locationClient.removeLocationUpdates(locationCallback)
+        }
+    }
+
+    val posActual = LatLng(estado.latitud, estado.longitud)
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(posActual, 15f)
+    }
+
+    LaunchedEffect(estado.latitud, estado.longitud) {
+        cameraPositionState.position = CameraPosition.fromLatLngZoom(posActual, 15f)
+    }
+
     Scaffold(
         topBar = { DefaultTopAppBar("Monitoreo y ubicación de tu actividad") },
         bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, controller) }
-    ) {paddingValues ->
-        Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            Box(modifier = Modifier.weight(2f).padding(horizontal = 30.dp, vertical =15.dp)) {
-                Image(
-                    painterResource(R.drawable.mapatemporal),
-                    "Mapa",
-                    modifier = Modifier.fillMaxSize(),
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
 
-                    contentScale = ContentScale.Crop
-                )
-                Icon(Icons.Default.LocationOn, "Ubicación", modifier = Modifier.align(alignment = Alignment.TopStart).size(100.dp), tint=colorResource(R.color.rojoGranada))
-                Icon(Icons.Default.ArrowDropDown, "Objetivo", modifier = Modifier.align(alignment = Alignment.BottomStart).size(200.dp), tint= colorResource(R.color.teal_700)
-                )
+            // Mapa Google
+            Box(
+                modifier = Modifier
+                    .weight(2f)
+                    .padding(horizontal = 30.dp, vertical = 15.dp)
+            ) {
+                GoogleMap(
+                    modifier = Modifier.fillMaxSize(),
+                    cameraPositionState = cameraPositionState,
+                    properties = MapProperties(mapStyleOptions = estiloActual),
+                    uiSettings = MapUiSettings(
+                        zoomControlsEnabled = true,
+                        compassEnabled = true
+                    )
+                ) {
+                    // Marcador de posición del deportista
+                    Marker(
+                        state = rememberMarkerState(position = posActual),
+                        title = "Mi ubicación",
+                        snippet = estado.direccionActual
+                    )
+                }
             }
+
+            // Tarjeta de datos de la actividad
             ElevatedCard(
-                modifier = Modifier.padding(vertical = 15.dp, horizontal = 30.dp).weight(0.7f),
-                colors= CardDefaults.cardColors(colorResource(R.color.pink))
+                modifier = Modifier
+                    .padding(vertical = 15.dp, horizontal = 30.dp)
+                    .weight(0.7f),
+                colors = CardDefaults.cardColors(colorResource(R.color.pink))
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(15.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
                 ) {
                     Box {
                         Icon(
                             Icons.Default.AccountCircle,
-                            "Simbolo de persona",
+                            "Símbolo de persona",
                             modifier = Modifier.size(50.dp)
                         )
                         Icon(
@@ -79,27 +184,38 @@ fun MiUbicacion (controller: NavController, inicio: String , final:String, activ
                     }
                     Column(
                         modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(
-                            5.dp,
-                            Alignment.CenterVertically
-                        ),
+                        verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
                         horizontalAlignment = Alignment.Start
                     ) {
-                        Text("Nombre", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        Text("Distancia a recorrer: X km", fontSize = 12.sp)
-                        Text("Actividad: ${actividad}", fontSize = 12.sp)
+                        // Dirección resuelta por Geocoder
+                        Text(
+                            estado.direccionActual,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "Distancia recorrida: ${estado.distanciaRecorrida} km",
+                            fontSize = 12.sp
+                        )
+                        Text(
+                            "Actividad: $actividad",
+                            fontSize = 12.sp
+                        )
                     }
                 }
             }
-            Column(modifier=Modifier.weight(1f).fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally) {
+
+            // Botón finalizar
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                 DefaulButton("Finalizar actividad", 220, 40) {
-                    controller.navigate(route= AppScreens.crearSesion.name)
+                    controller.navigate(route = AppScreens.crearSesion.name)
                 }
-            }
             }
         }
     }
-
-
-
+}

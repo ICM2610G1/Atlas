@@ -56,7 +56,7 @@ enum class AppScreens{
     vistaSesionesEnt,
     resumenSesion,
     RecoverPassword,
-    AppFinal,
+    // AppFinal,
     MessageEmail,
     troteActivo,
 
