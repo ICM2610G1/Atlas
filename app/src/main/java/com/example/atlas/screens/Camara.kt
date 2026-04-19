@@ -1,5 +1,6 @@
 package com.example.atlas.screens
 
+
 import android.net.Uri
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -75,21 +76,21 @@ fun Camara(controller: NavController) {
                     model = UriImagen,
                     contentDescription = "foto recuperada",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.weight(1F).fillMaxWidth()
+                    modifier = Modifier.size(300.dp).fillMaxWidth()
 
                 )
             } else {
                 Image(
                     painter = painterResource(R.drawable.oso_megafono),
                     contentDescription = "Foto",
-                    modifier = Modifier.size(350.dp)
+                    modifier = Modifier.size(300.dp)
                 )
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally)
+                    .padding(bottom = 5.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
                 DefaulButton("Galeria", 100, 40) {
                     galeria.launch("image/*")
@@ -98,15 +99,18 @@ fun Camara(controller: NavController) {
                 DefaulButton("Camara", 100, 40) {
                     camera.launch(UriCamara)
                 }
+                DefaulButton("Subir", 100, 40) {
+                    Log.i("TAGuardarFt","Guardo la foto ")
+                }
 
 
-
-            }
-            DefaulButton("Subir ft", 200, 40) {
-                Log.i("TAGuardarFt","Guardo la ft ")
             }
 
 
         }
     }
 }
+
+
+
+
