@@ -1,5 +1,6 @@
 package com.example.atlas.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,15 +17,61 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.atlas.R
+import com.example.atlas.auth
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
+import com.google.firebase.auth.UserProfileChangeRequest
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+data class RegisterState(
+    val usuario: String = "",
+    val telefono: String = "",
+    val correo: String = "",
+    val pass: String = "",
+    val mostrarPass: Boolean = false,
+    val aceptar: Boolean = false
+)
+class RegisterViewModel : ViewModel() {
+    private val _registerState = MutableStateFlow(RegisterState())
+    val registerState = _registerState.asStateFlow()
+
+    fun updateUsuario(value: String) {
+        _registerState.value = _registerState.value.copy(usuario = value)
+    }
+    fun updateTelefono(value: String) {
+        _registerState.value = _registerState.value.copy(telefono = value)
+    }
+    fun updateCorreo(value: String)
+    { _registerState.value = _registerState.value.copy(correo = value)
+
+    }
+    fun updatePass(value: String) {
+        _registerState.value = _registerState.value.copy(pass = value)
+    }
+    fun toggleMostrarPass()
+    { _registerState.value = _registerState.value.copy(mostrarPass = !_registerState.value.mostrarPass)
+
+    }
+    fun toggleAceptar() {
+        _registerState.value = _registerState.value.copy(aceptar = !_registerState.value.aceptar)
+    }
+}
+
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUp(controller: NavController) {
+fun SignUp(controller: NavController , model : RegisterViewModel = viewModel() ) {
+    val state by model.registerState.collectAsState()
+
 
     val rojo = colorResource(id = R.color.rojoGranada)
     val fondo = colorResource(id = R.color.pink)
@@ -70,8 +117,8 @@ fun SignUp(controller: NavController) {
                 )
 
                 TextField(
-                    value = usuario,
-                    onValueChange = { usuario = it },
+                    value = state.usuario,
+                    onValueChange = { model.updateUsuario(it) },
                     label = { Text("Usuario") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -80,8 +127,8 @@ fun SignUp(controller: NavController) {
                 )
 
                 TextField(
-                    value = telefono,
-                    onValueChange = { telefono = it },
+                    value = state.telefono,
+                    onValueChange = { model.updateTelefono(it) },
                     label = { Text("Teléfono") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -90,8 +137,8 @@ fun SignUp(controller: NavController) {
                 )
 
                 TextField(
-                    value = correo,
-                    onValueChange = { correo = it },
+                    value = state.correo,
+                    onValueChange = {model.updateCorreo(it)},
                     label = { Text("Correo") },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -100,20 +147,20 @@ fun SignUp(controller: NavController) {
                 )
 
                 TextField(
-                    value = pass,
-                    onValueChange = { pass = it },
+                    value = state.pass,
+                    onValueChange = { model.updatePass(it) },
                     label = { Text("Contraseña") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 14.dp),
                     singleLine = true,
-                    visualTransformation = if (mostrarPass)
+                    visualTransformation = if (state.mostrarPass)
                         VisualTransformation.None
                     else
                         PasswordVisualTransformation(),
                     trailingIcon = {
-                        TextButton(onClick = { mostrarPass = !mostrarPass }) {
-                            Text(if (mostrarPass) "Ocultar" else "Ver")
+                        TextButton(onClick = {model.toggleMostrarPass() }) {
+                            Text(if (state.mostrarPass) "Ocultar" else "Ver")
                         }
                     }
                 )
@@ -125,14 +172,33 @@ fun SignUp(controller: NavController) {
                         .padding(top = 8.dp)
                 ) {
                     Checkbox(
-                        checked = aceptar,
-                        onCheckedChange = { aceptar = it }
+                        checked = state.aceptar,
+                        onCheckedChange = { model.toggleAceptar()}
                     )
                     Text("Acepto términos y condiciones")
                 }
 
                 Button(
-                    onClick = {controller.navigate(route= AppScreens.Home.name) },
+                    onClick = {
+                        auth.createUserWithEmailAndPassword(state.correo, state.pass).addOnCompleteListener {
+                            if (it.isSuccessful){
+                                val user = auth.currentUser
+                                user?.let{
+                                    var upcrb = UserProfileChangeRequest.Builder()
+                                    upcrb.setDisplayName(state.usuario)
+                                    if (state.correo.lowercase().contains("entrenador")) {
+                                        controller.navigate(route = AppScreens.HomeCoach.name)
+                                    } else {
+                                        controller.navigate(route = AppScreens.Home.name)
+                                    }
+
+                                }
+                            }else{
+                                Log.e("MYTAG", "Error creating user"+state.correo)
+                            }
+                        }
+
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 20.dp)
@@ -148,4 +214,6 @@ fun SignUp(controller: NavController) {
         }
     }
 }
+
+
 
