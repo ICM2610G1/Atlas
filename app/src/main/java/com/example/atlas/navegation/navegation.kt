@@ -70,6 +70,7 @@ enum class AppScreens{
 fun Navigation(){
     val navController = rememberNavController()
     NavHost(navController, startDestination = AppScreens.Home.name) {
+    //NavHost(navController, startDestination = AppScreens.LogIn.name){
         composable (route= AppScreens.Appstart.name){
             AppStart(navController)
         }

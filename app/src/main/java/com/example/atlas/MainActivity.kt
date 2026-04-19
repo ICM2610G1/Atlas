@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.atlas.elements.ScaffoldDesign
 import com.example.atlas.navegation.Navigation
 import com.example.atlas.ui.theme.AtlasTheme
+import com.google.firebase.auth.FirebaseAuth
 
 lateinit var auth : FirebaseAuth
 
