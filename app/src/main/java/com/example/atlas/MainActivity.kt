@@ -15,13 +15,15 @@ import com.example.atlas.elements.ScaffoldDesign
 import com.example.atlas.navegation.Navigation
 import com.example.atlas.ui.theme.AtlasTheme
 
+lateinit var auth : FirebaseAuth
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            auth = FirebaseAuth.getInstance()
             Navigation();
         }
     }
 }
-
