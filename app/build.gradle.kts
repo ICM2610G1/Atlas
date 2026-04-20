@@ -69,7 +69,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation(libs.maps.compose)
     implementation("com.google.android.gms:play-services-maps:20.0.0")
-    implementation(libs.charts)
+    implementation ("com.github.tehras:charts:0.2.4-alpha")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)
