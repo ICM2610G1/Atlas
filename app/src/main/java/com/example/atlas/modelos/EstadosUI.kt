@@ -86,6 +86,7 @@ data class EstadoMiUbicacion(
     val temperaturaPromedio: Float = 0f,
     val puntosElevacion: List<ElevationPoint> = emptyList(),
     val tiempoSegundos: Int = 0
+    val puntosRuta: List<LatLng> = emptyList()
 )
 
 data class Authstate(
