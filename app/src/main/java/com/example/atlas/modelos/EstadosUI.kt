@@ -65,6 +65,12 @@ data class EstadoUbicacion(
     val direccion: String = "Obteniendo ubicación...",
     val distanciaKm: Double = 0.0,
     val tiempoMin: Int = 0
+
+)
+//Esta en particular sirve para almacenar la altura
+data class ElevationPoint(
+    val distancia: Double,
+    val altitud: Float
 )
 
 data class EstadoMiUbicacion(
@@ -75,7 +81,11 @@ data class EstadoMiUbicacion(
     val direccionActual: String = "",
     val distanciaRecorrida: Double = 0.0,
     val posicionOrigen: LatLng? = null,
-    val posicionDestino: LatLng? = null
+    val posicionDestino: LatLng? = null,
+    val temperaturaActual: Float = 0f,
+    val temperaturaPromedio: Float = 0f,
+    val puntosElevacion: List<ElevationPoint> = emptyList(),
+    val tiempoSegundos: Int = 0
 )
 
 data class Authstate(
