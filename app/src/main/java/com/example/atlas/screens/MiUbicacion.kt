@@ -234,6 +234,12 @@ fun MiUbicacion(
         }
     }
 
+    LaunchedEffect(estado.posicionOrigen, estado.posicionDestino) {
+        if (estado.posicionOrigen != null && estado.posicionDestino != null) {
+            modelo.calcularRuta(contexto)
+        }
+    }
+
     Scaffold(
         topBar = { DefaultTopAppBar("Monitoreo y ubicación de tu actividad") },
         bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, navController) }
@@ -279,6 +285,11 @@ fun MiUbicacion(
                             snippet = inicio
                         )
                     }
+
+                    if (estado.puntosRuta.isNotEmpty()) {
+                        Polyline(points = estado.puntosRuta, width = 10f, color = colorResource(R.color.rojoGranada))
+                    }
+                    
                     estado.posicionDestino?.let {
                         Marker(
                             state = MarkerState(position = it),
