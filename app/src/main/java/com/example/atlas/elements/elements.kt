@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Star
@@ -51,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.atlas.auth
 import com.example.atlas.navegation.AppScreens
 import kotlin.random.Random
 
@@ -170,6 +172,42 @@ fun DefaulButton (text : String  , ancho : Int , alto : Int , funcion : () -> Un
     }
 
 }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DefaultTopAppBarHome (nombre : String , controller: NavController){
+
+    TopAppBar({Box(
+        modifier = Modifier.fillMaxHeight(),
+        contentAlignment = Alignment.CenterStart,
+
+        ) {
+        Text(nombre,color=Color.White, fontWeight = FontWeight.Black)
+    }},
+        colors = TopAppBarColors(
+            containerColor = colorResource(R.color.rojoGranada),
+            scrolledContainerColor= Color.White,
+            navigationIconContentColor =Color.White,
+            titleContentColor = Color.White ,
+            actionIconContentColor =Color.White ,
+        ),
+
+        modifier = Modifier.height(100.dp).clip(shape =  RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)),
+        actions = {
+            IconButton(onClick = {
+                auth.signOut()
+                controller.navigate(AppScreens.LogIn.name){
+                    popUpTo(AppScreens.Home.name){
+                        inclusive = true
+                    }
+                }
+            }
+            ) {Icon(Icons.Default.ExitToApp, contentDescription = null) }
+        }
+    )
+}
+
+
+
 
 
 // Existe el  CenterAlignedTopAppBar para centra el texto
