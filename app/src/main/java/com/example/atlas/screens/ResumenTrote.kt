@@ -70,7 +70,7 @@ fun BarrasElevacion(puntosElevacion: List<ElevationPoint>) {
     BarChart(
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .height(300.dp),
+            .height(150.dp),
         barChartData = BarChartData(bars = barras)
     )
 }
@@ -97,7 +97,7 @@ fun ResumenTrote(controller: NavController, model: ModeloMiUbicacion= viewModel(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(130.dp) // Un poco más pequeño para dar espacio
+                    .height(130.dp)
             ) {
                 Image(
                     painter = painterResource(R.drawable.puma),
@@ -125,7 +125,7 @@ fun ResumenTrote(controller: NavController, model: ModeloMiUbicacion= viewModel(
 
             Row(
                 modifier = Modifier
-                    .height(280.dp)
+                    .height(200.dp)
                     .padding(horizontal = 10.dp)
             ) {
                 ElevatedCard(
@@ -192,7 +192,7 @@ fun ResumenTrote(controller: NavController, model: ModeloMiUbicacion= viewModel(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 DefaulButton("Terminar sesión", 220, 40) {
-                    controller.navigate(route = AppScreens.Home.name)
+                    controller.navigate(route = AppScreens.ResumenSesion.name)
                     Toast.makeText(context, "Sesión finalizada y registrada", Toast.LENGTH_LONG)
                         .show()
                 }
