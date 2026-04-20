@@ -161,7 +161,7 @@ fun CrearNuevaSesion(controller: NavController) {
             ) {
                 DefaulButton("Terminar sesión", 220, 40) {
                     Log.i("TAGInicio", "Click Iniciar ")
-                    controller.navigate(route = AppScreens.ChequeoSesion.name)
+                    controller.navigate(route = AppScreens.ResumenTrote.name)
                 }
             }
         }

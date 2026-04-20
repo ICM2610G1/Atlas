@@ -30,7 +30,8 @@ import com.example.atlas.screens.Progreso
 import com.example.atlas.screens.RecoverPassword
 import com.example.atlas.screens.TroteActivo
 import com.example.atlas.screens.chatP
-import com.example.atlas.screens.subirFoto
+import com.example.atlas.screens.ResumenSesion
+import com.example.atlas.screens.ResumenTrote
 import com.example.atlas.screens.vistaSesionesEntrenador
 
 enum class AppScreens{
@@ -40,26 +41,25 @@ enum class AppScreens{
     Perfil,
     Chats,
     Ubicacion,
-
     Mimapa,
     Historial,
     PerfilEnt,
     Calificar,
     SignUp,
     LogIn,
-    crearSesion,
+    CrearNuevaSesion,
     detallesTrote,
     DetalleSesion,
     ChequeoSesion,
     chatsP,
     Ejercicios,
+    ResumenTrote,
     vistaSesionesEnt,
-    resumenSesion,
+    ResumenSesion,
     RecoverPassword,
     // AppFinal,
     MessageEmail,
     troteActivo,
-
     agregarEjercicio,
     Camara,
     Progreso
@@ -89,7 +89,7 @@ fun Navigation(){
         composable(route= AppScreens.vistaSesionesEnt.name) {
             vistaSesionesEntrenador(navController)
         }
-        composable (route= AppScreens.crearSesion.name){
+        composable (route= AppScreens.CrearNuevaSesion.name){
             CrearNuevaSesion(navController)
         }
         composable (route= AppScreens.Ejercicios.name+"/{ejercicio}"){
@@ -112,8 +112,12 @@ fun Navigation(){
         composable (route= AppScreens.Ubicacion.name){
             Ubicacion(navController)
         }
-        composable(route= AppScreens.resumenSesion.name){
-            subirFoto(navController)
+        composable(route = AppScreens.ResumenTrote.name){
+            ResumenTrote(navController)
+        }
+
+        composable(route = AppScreens.ResumenSesion.name){
+            ResumenSesion(navController)
         }
         composable (route= AppScreens.Historial.name){
             Historial(navController)

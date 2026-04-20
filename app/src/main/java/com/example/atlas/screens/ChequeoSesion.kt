@@ -150,7 +150,7 @@ fun ChequeoSesion(controller: NavController, viewModel: EjercicioViewModel = vie
             }
 
             DefaulButton(text = "Terminar sesion", ancho = 240, alto = 50) {
-                controller.navigate(route = AppScreens.resumenSesion.name)
+                controller.navigate(route = AppScreens.CrearNuevaSesion.name)
             }
 
         }

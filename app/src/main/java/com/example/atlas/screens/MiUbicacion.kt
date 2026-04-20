@@ -247,7 +247,7 @@ fun MiUbicacion(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 DefaulButton("Finalizar actividad", 220, 40) {
-                    navController.navigate(route = AppScreens.crearSesion.name)
+                    navController.navigate(route = AppScreens.CrearNuevaSesion.name)
                 }
             }
         }
