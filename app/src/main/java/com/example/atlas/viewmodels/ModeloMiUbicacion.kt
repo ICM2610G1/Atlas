@@ -116,4 +116,23 @@ class ModeloMiUbicacion : ViewModel() {
     fun actualizarTiempo(segundos: Int) {
         _estado.update { it.copy(tiempoSegundos = segundos) }
     }
+
+        fun calcularRuta(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val origen = _estado.value.posicionOrigen
+            val destino = _estado.value.posicionDestino
+
+            if (origen != null && destino != null) {
+                val roadManager = org.osmdroid.bonuspack.routing.OSRMRoadManager(context, "ANDROID")
+                val puntos = arrayListOf(org.osmdroid.util.GeoPoint(origen.latitude, origen.longitude),
+                    org.osmdroid.util.GeoPoint(destino.latitude, destino.longitude)
+                )
+                val road = roadManager.getRoad(puntos)
+                val puntosRuta = road.mRouteHigh.map {
+                    LatLng(it.latitude, it.longitude)
+                }
+                _estado.update { it.copy(puntosRuta = puntosRuta) }
+            }
+        }
+    }
 }
