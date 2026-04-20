@@ -34,22 +34,24 @@ import androidx.navigation.compose.rememberNavController
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.elements.DefaultTopAppBarHome
 import com.example.atlas.navegation.AppScreens
 
 
 @Composable
 fun Home (controller : NavController){
-    Scaffold(topBar = { DefaultTopAppBar("Home")}, bottomBar = {(DefaultBottomBarDep(R.color.pink,controller))}) {
-        paddingValues ->
-        Column(verticalArrangement = Arrangement.spacedBy(40.dp , Alignment.CenterVertically),
+    Scaffold(topBar = { DefaultTopAppBarHome("Home",controller) }, bottomBar = {(DefaultBottomBarDep(R.color.pink,controller))}) {
+            paddingValues ->
+        Column(verticalArrangement = Arrangement.spacedBy(20.dp , Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(vertical = 20.dp)) {
 
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1F)
 
-                ) {
+            ) {
 
                 icono_circulo(R.drawable.mensajero, "Chats")
                 DefaulButton("Chats", 220, 40) {
@@ -60,20 +62,23 @@ fun Home (controller : NavController){
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1F)
 
-                ) {
+            ) {
 
                 icono_circulo(R.drawable.historial, "Historial")
                 DefaulButton("Historial", 220, 40) {
                     Log.i("TAGHistorial", "Click Historial")
                     controller.navigate(route = AppScreens.Historial.name)
+
                 }
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1F)
 
-                ) {
+            ) {
 
                 icono_circulo(R.drawable.mapa, "Ubicacion")
                 DefaulButton("Nueva Sesión", 220, 40) {
@@ -94,10 +99,9 @@ fun Home (controller : NavController){
                 }
             }
 
-
             Row(verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Start,
-                modifier = Modifier.fillMaxWidth().height(250.dp)) {
+                modifier = Modifier.fillMaxWidth().weight(4F).height(250.dp)) {
                 Image(
                     painter = painterResource(R.drawable.puma),
                     contentDescription = "LogoAtlas",
@@ -105,14 +109,14 @@ fun Home (controller : NavController){
                     modifier = Modifier.fillMaxHeight()
 
                 )
-                Box (){
+                Box (modifier = Modifier.weight(1F)){
                     Icon(painter = painterResource(R.drawable.burbuja),
                         contentDescription = "DialogoPuma",
                         tint = colorResource(R.color.rojoGranada)
                     )
                     Text("Qué elegirás hoy? ", color = colorResource(R.color.rojoGranada),
-                        fontSize = (18.sp),
-                        modifier = Modifier.padding (vertical = 80.dp, horizontal = 25.dp))
+                        fontSize = (15.sp),
+                        modifier = Modifier.padding (vertical = 60.dp, horizontal = 25.dp))
                 }
 
 
@@ -131,7 +135,7 @@ fun PreviewHome (){
     Home(nc)
 }
 @Composable
-    fun icono_circulo(imageId : Int ,cotenido : String) {
+fun icono_circulo(imageId : Int ,cotenido : String) {
     Box(
         modifier = Modifier
             .size(50.dp)

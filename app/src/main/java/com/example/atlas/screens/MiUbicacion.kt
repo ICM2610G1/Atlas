@@ -5,6 +5,7 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.content.pm.PackageManager
+import android.hardware.SensorManager
 import android.os.Looper
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -38,13 +39,14 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
+import kotlinx.coroutines.delay
 
 @Composable
 fun MiUbicacion(
     navController: NavController,
-    inicio: String,
-    final: String,
-    actividad: String,
+    inicio: String="",
+    final: String="",
+    actividad: String="",
     modelo: ModeloMiUbicacion = viewModel()
 ) {
     val estado by modelo.estado.collectAsState()
@@ -67,12 +69,13 @@ fun MiUbicacion(
         }
     }
 
+
+
     DisposableEffect(Unit) {
-        sensorManager.registerListener(listenerLuz, sensorLuz, android.hardware.SensorManager.SENSOR_DELAY_NORMAL)
+        sensorManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_NORMAL)
         onDispose { sensorManager.unregisterListener(listenerLuz) }
     }
 
-    // Estilo del mapa según luminosidad
     val estiloMapa = remember(esOscuro) {
         MapStyleOptions.loadRawResourceStyle(
             contexto,
@@ -80,7 +83,88 @@ fun MiUbicacion(
         )
     }
 
-    // GPS del deportista
+    val sensorTemperatura = remember {
+        sensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE)
+    }
+    var temperaturaActual by remember { mutableStateOf(0f) }
+    val sumaTemperaturas = remember { mutableFloatStateOf(0f) }
+    val contadorTemperaturas = remember { mutableIntStateOf(0) }
+
+    val listenerTemperatura = remember {
+        object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                if (event?.sensor?.type == Sensor.TYPE_AMBIENT_TEMPERATURE) {
+                    val temp = event.values[0]
+                    temperaturaActual = temp
+                    sumaTemperaturas.floatValue += temp
+                    contadorTemperaturas.intValue++
+                    modelo.actualizarTemperatura(
+                        temp,
+                        sumaTemperaturas.floatValue / contadorTemperaturas.intValue
+                    )
+                }
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+    }
+
+    DisposableEffect(Unit) {
+        sensorManager.registerListener(listenerTemperatura, sensorTemperatura, SensorManager.SENSOR_DELAY_NORMAL)
+        onDispose { sensorManager.unregisterListener(listenerTemperatura) }
+    }
+
+    val sensorPresion = remember {
+        sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE)
+    }
+    var lastRecordTime by remember { mutableStateOf(0L) }
+    val INTERVALO_MS = 5000L
+
+    val listenerPresion = remember {
+        object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent?) {
+                if (event?.sensor?.type == Sensor.TYPE_PRESSURE) {
+                    val altitud = SensorManager.getAltitude(
+                        SensorManager.PRESSURE_STANDARD_ATMOSPHERE,
+                        event.values[0]
+                    )
+                    val ahora = System.currentTimeMillis()
+                    if (ahora - lastRecordTime >= INTERVALO_MS) {
+                        modelo.agregarPuntoElevacion(estado.distanciaRecorrida, altitud)
+                        lastRecordTime = ahora
+                    }
+                }
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+    }
+    DisposableEffect(Unit) {
+        sensorManager.registerListener(listenerPresion, sensorPresion, SensorManager.SENSOR_DELAY_NORMAL)
+        onDispose { sensorManager.unregisterListener(listenerPresion) }
+    }
+
+    var tiempoSegundos by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1000L)
+            tiempoSegundos++
+        }
+    }
+    fun formatearTiempo(segundos: Int): String {
+        val h = segundos / 3600
+        val m = (segundos % 3600) / 60
+        val s = segundos % 60
+        return "%02d:%02d:%02d".format(h, m, s)
+    }
+    fun condicionClima(temp: Float): String {
+        return when {
+            temp < 10f -> "La temperatura es bajo, abrigate"
+            temp < 18f -> "Fresco — ideal para trotar"
+            temp < 25f -> "Agradable"
+            temp < 32f -> "Calor — hidrátate seguido"
+            else       -> "Muy caliente — ten cuidado"
+        }
+    }
+
     val locationClient = LocationServices.getFusedLocationProviderClient(contexto)
 
     val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000L)
@@ -98,7 +182,6 @@ fun MiUbicacion(
         }
     }
 
-    // Permiso de ubicación
     val lanzadorPermisoUbicacion = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { concedido ->
@@ -132,13 +215,11 @@ fun MiUbicacion(
         onDispose { locationClient.removeLocationUpdates(locationCallback) }
     }
 
-    // Marcadores de origen y destino
     LaunchedEffect(inicio, final) {
         if (inicio.isNotBlank()) modelo.resolverOrigen(inicio)
         if (final.isNotBlank()) modelo.resolverDestino(final)
     }
 
-    // Cámara del mapa
     val posicionCamara = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(4.627293, -74.063228), 13f)
     }
@@ -153,7 +234,6 @@ fun MiUbicacion(
         }
     }
 
-    // ── UI
     Scaffold(
         topBar = { DefaultTopAppBar("Monitoreo y ubicación de tu actividad") },
         bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, navController) }
@@ -192,7 +272,6 @@ fun MiUbicacion(
                         )
                     }
 
-                    // Marcador origen
                     estado.posicionOrigen?.let {
                         Marker(
                             state = MarkerState(position = it),
@@ -200,8 +279,6 @@ fun MiUbicacion(
                             snippet = inicio
                         )
                     }
-
-                    // Marcador destino
                     estado.posicionDestino?.let {
                         Marker(
                             state = MarkerState(position = it),
@@ -215,7 +292,7 @@ fun MiUbicacion(
             ElevatedCard(
                 modifier = Modifier
                     .padding(vertical = 15.dp, horizontal = 30.dp)
-                    .weight(0.7f),
+                    .weight(1f),
                 colors = CardDefaults.cardColors(containerColor = colorResource(R.color.pink))
             ) {
                 Row(
@@ -238,6 +315,8 @@ fun MiUbicacion(
                         Text(estado.direccionActual, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                         Text("Distancia recorrida: ${estado.distanciaRecorrida} km", fontSize = 12.sp)
                         Text("Actividad: $actividad", fontSize = 12.sp)
+                        Text("Tiempo: ${formatearTiempo(tiempoSegundos)}", fontSize = 12.sp)
+                        Text("${"%.1f".format(temperaturaActual)}°C — ${condicionClima(temperaturaActual)}", fontSize = 12.sp)
                     }
                 }
             }
@@ -248,8 +327,10 @@ fun MiUbicacion(
             ) {
                 DefaulButton("Finalizar actividad", 220, 40) {
                     navController.navigate(route = AppScreens.CrearNuevaSesion.name)
+                    modelo.actualizarTiempo(tiempoSegundos)
                 }
             }
         }
     }
 }
+

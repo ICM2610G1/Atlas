@@ -1,6 +1,6 @@
 package com.example.atlas.screens
 
-import androidx.compose.foundation.Canvas
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,16 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -31,17 +31,54 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.modelos.ElevationPoint
 import com.example.atlas.navegation.AppScreens
+import com.example.atlas.viewmodels.ModeloMiUbicacion
+import com.github.tehras.charts.bar.BarChart
+import com.github.tehras.charts.bar.BarChartData
+@Composable
+fun BarrasElevacion(puntosElevacion: List<ElevationPoint>) {
+
+    if (puntosElevacion.isEmpty()) {
+        Text(
+            text = "Sin datos de elevación",
+            color = Color.Gray,
+            fontSize = 12.sp,
+            modifier = Modifier.padding(16.dp)
+        )
+        return
+    }
+
+    val barras = ArrayList<BarChartData.Bar>()
+
+    puntosElevacion.mapIndexed { index, punto ->
+        barras.add(
+            BarChartData.Bar(
+                label = "",
+                value = punto.altitud,
+                color = colorResource(R.color.rojoGranada)
+            )
+        )
+    }
+
+    BarChart(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .height(300.dp),
+        barChartData = BarChartData(bars = barras)
+    )
+}
 
 @Composable
-fun ResumenTrote(controller: NavController) {
+fun ResumenTrote(controller: NavController, model: ModeloMiUbicacion= viewModel()) {
+    val estado by model.estado.collectAsState()
     val context = LocalContext.current
-    val historialPresion = listOf(10f, 30f, 25f, 50f, 70f, 60f, 90f, 40f, 30f, 55f)
     val rojoGranada = colorResource(R.color.rojoGranada)
 
     Scaffold(
@@ -111,9 +148,9 @@ fun ResumenTrote(controller: NavController) {
                             color = rojoGranada
                         )
 
-                        DatoResumen("Tiempo", "00:00 min")
-                        DatoResumen("Distancia", "0 m")
-                        DatoResumen("Velocidad", "0.0 km/h")
+                        DatoResumen("Tiempo", "${estado.tiempoSegundos} s")
+                        DatoResumen("Distancia", "${estado.distanciaRecorrida*1000} m")
+                        DatoResumen("Velocidad", "${estado.distanciaRecorrida*1000/estado.tiempoSegundos} m/s")
                     }
                 }
             }
@@ -124,44 +161,45 @@ fun ResumenTrote(controller: NavController) {
                 fontWeight = FontWeight.Bold,
                 color = Color.Gray
             )
-
-            ElevatedCard(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(horizontal = 15.dp),
-                colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+                    .padding(horizontal = 24.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
-                Canvas(modifier = Modifier.fillMaxSize().padding(20.dp)) {
-                    val spacing = size.width / historialPresion.size
-                    val barWidth = spacing * 0.6f
-                    val maxVal = historialPresion.maxOrNull() ?: 1f
-
-                    historialPresion.forEachIndexed { index, value ->
-                        val barHeight = (value / maxVal) * size.height
-                        drawRoundRect(
-                            color = rojoGranada,
-                            topLeft = Offset(index * spacing, size.height - barHeight),
-                            size = Size(barWidth, barHeight),
-                            cornerRadius = CornerRadius(4.dp.toPx())
-                        )
-                    }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Perfil de elevación",
+                        color = colorResource(R.color.rojoGranada),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    BarrasElevacion(puntosElevacion = estado.puntosElevacion)
                 }
             }
+
 
             Spacer(modifier = Modifier.height(30.dp))
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                DefaulButton("Detalle pesas", 220, 40) {
-                    controller.navigate(route = AppScreens.ResumenSesion.name)
+                DefaulButton("Terminar sesión", 220, 40) {
+                    controller.navigate(route = AppScreens.Home.name)
+                    Toast.makeText(context, "Sesión finalizada y registrada", Toast.LENGTH_LONG)
+                        .show()
                 }
             }
         }
     }
 }
-
 // Función auxiliar para no repetir tanto código de texto
 @Composable
 fun DatoResumen(label: String, value: String) {

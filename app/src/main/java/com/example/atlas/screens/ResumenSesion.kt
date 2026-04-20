@@ -59,13 +59,12 @@ fun ResumenSesion(controller: NavController) {
                 .fillMaxSize()
                 .padding(bottom = 20.dp)
         ) {
-            // --- Bloque del Puma y Diálogo ---
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(130.dp) // Un poco más pequeño para dar espacio
+                    .height(130.dp)
             ) {
                 Image(
                     painter = painterResource(R.drawable.puma),
