@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.atlas.geocoder
+import com.example.atlas.modelos.ElevationPoint
 import com.example.atlas.modelos.EstadoMiUbicacion
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +28,26 @@ class ModeloMiUbicacion : ViewModel() {
         Log.i("ModeloMiUbicacion", "Inicio registrado: $lat, $lng")
     }
 
+    fun actualizarTemperatura(temp: Float, promedio: Float) {
+        _estado.update { it.copy(
+            temperaturaActual = temp,
+            temperaturaPromedio = promedio
+        )}
+    }
+
+    fun agregarPuntoElevacion(distancia: Double, altitud: Float) {
+        val puntos = _estado.value.puntosElevacion.toMutableList()
+        val altitudRelativa = if (puntos.isEmpty()) 0f
+        else altitud - puntos.first().altitud
+        puntos.add(ElevationPoint(distancia, altitudRelativa))
+        val minVal = puntos.minOf { it.altitud }
+        val puntosAjustados = if (minVal < 0) {
+            puntos.map { it.copy(altitud = it.altitud + Math.abs(minVal)) }
+        } else puntos
+
+        _estado.update { it.copy(puntosElevacion = puntosAjustados) }
+    }
+
     fun actualizarPosicion(lat: Double, lng: Double) {
         val distancia = calcularDistancia(
             _estado.value.latInicio, _estado.value.lngInicio, lat, lng
@@ -35,8 +56,6 @@ class ModeloMiUbicacion : ViewModel() {
             it.copy(latitud = lat, longitud = lng, distanciaRecorrida = distancia)
         }
     }
-
-    // Resolver dirección textual con Geocoder
     fun resolverDireccion(context: Context, lat: Double, lng: Double) {
         val geocoderLocal = Geocoder(context, Locale.getDefault())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -54,8 +73,6 @@ class ModeloMiUbicacion : ViewModel() {
             }
         }
     }
-
-    // Resolver coordenadas de origen por nombre
     fun resolverOrigen(nombre: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val resultado = findLocation(nombre)
@@ -65,7 +82,6 @@ class ModeloMiUbicacion : ViewModel() {
         }
     }
 
-    // Resolver coordenadas de destino por nombre
     fun resolverDestino(nombre: String) {
         viewModelScope.launch(Dispatchers.IO) {
             val resultado = findLocation(nombre)
@@ -96,5 +112,8 @@ class ModeloMiUbicacion : ViewModel() {
                 Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2)
         val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
         return Math.round(6371 * c * 100.0) / 100.0
+    }
+    fun actualizarTiempo(segundos: Int) {
+        _estado.update { it.copy(tiempoSegundos = segundos) }
     }
 }
