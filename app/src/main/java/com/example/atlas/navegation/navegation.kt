@@ -28,11 +28,12 @@ import com.example.atlas.screens.MessageEmail
 import com.example.atlas.screens.MiUbicacion
 import com.example.atlas.screens.Progreso
 import com.example.atlas.screens.RecoverPassword
-import com.example.atlas.screens.TroteActivo
-import com.example.atlas.screens.chatP
 import com.example.atlas.screens.ResumenSesion
 import com.example.atlas.screens.ResumenTrote
+import com.example.atlas.screens.TroteActivo
+import com.example.atlas.screens.chatP
 import com.example.atlas.screens.vistaSesionesEntrenador
+import com.example.atlas.viewmodels.ModeloMiUbicacion
 
 enum class AppScreens{
     Appstart,
@@ -41,6 +42,7 @@ enum class AppScreens{
     Perfil,
     Chats,
     Ubicacion,
+
     Mimapa,
     Historial,
     PerfilEnt,
@@ -53,13 +55,14 @@ enum class AppScreens{
     ChequeoSesion,
     chatsP,
     Ejercicios,
-    ResumenTrote,
     vistaSesionesEnt,
     ResumenSesion,
     RecoverPassword,
     // AppFinal,
     MessageEmail,
     troteActivo,
+    ResumenTrote,
+
     agregarEjercicio,
     Camara,
     Progreso
@@ -69,7 +72,9 @@ enum class AppScreens{
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
-    NavHost(navController, startDestination = AppScreens.LogIn.name){
+    val miUbicacionViewModel: ModeloMiUbicacion = viewModel()
+    val EjercicioviewModel: EjercicioViewModel = viewModel()
+    NavHost(navController, startDestination = AppScreens.Home.name){
         composable (route= AppScreens.Appstart.name){
             AppStart(navController)
         }
@@ -94,30 +99,20 @@ fun Navigation(){
         }
         composable (route= AppScreens.Ejercicios.name+"/{ejercicio}"){
                 backStackEntry ->
-
-            val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(AppScreens.Ejercicios.name) }
-            val viewModel: EjercicioViewModel = viewModel(parentEntry)
             val ejercicio = backStackEntry.arguments?.getString("ejercicio")
 
-            PantallaEjercicios(controller = navController, ejercicio = ejercicio, viewModel = viewModel)
+            PantallaEjercicios(controller = navController, ejercicio = ejercicio, viewModel = EjercicioviewModel)
         }
         composable (route= AppScreens.Ejercicios.name){
-            val viewModel: EjercicioViewModel = viewModel()
 
-            PantallaEjercicios(controller = navController, viewModel = viewModel)
+
+            PantallaEjercicios(controller = navController, viewModel = EjercicioviewModel)
         }
         composable (route= AppScreens.detallesTrote.name){
             DetallesTrote(navController)
         }
         composable (route= AppScreens.Ubicacion.name){
             Ubicacion(navController)
-        }
-        composable(route = AppScreens.ResumenTrote.name){
-            ResumenTrote(navController)
-        }
-
-        composable(route = AppScreens.ResumenSesion.name){
-            ResumenSesion(navController)
         }
         composable (route= AppScreens.Historial.name){
             Historial(navController)
@@ -144,13 +139,9 @@ fun Navigation(){
         composable (route= AppScreens.DetalleSesion.name){
             DetalleSesion(navController)
         }
-        composable (route= AppScreens.ChequeoSesion.name){backStackEntry->
-            val parentEntry = remember(backStackEntry) {
-            navController.getBackStackEntry(AppScreens.Ejercicios.name)
+        composable (route= AppScreens.ChequeoSesion.name){
 
-        }
-            val viewModel: EjercicioViewModel = viewModel(parentEntry)
-            ChequeoSesion(navController,viewModel)
+            ChequeoSesion(navController,EjercicioviewModel)
         }
         composable (route= AppScreens.RecoverPassword.name){
             RecoverPassword(navController)
@@ -160,7 +151,14 @@ fun Navigation(){
             val lugarFinal = backStackEntry.arguments?.getString("fin") ?: ""
             val actividad = backStackEntry.arguments?.getString("actividad") ?: ""
 
-            MiUbicacion(navController, lugarInicio, lugarFinal, actividad)
+            MiUbicacion(navController, lugarInicio, lugarFinal, actividad, miUbicacionViewModel)
+        }
+        composable(route= AppScreens.ResumenTrote.name){
+
+            ResumenTrote(navController, miUbicacionViewModel)
+        }
+        composable(route = AppScreens.ResumenSesion.name){
+            ResumenSesion(navController)
         }
         composable (route= AppScreens.MessageEmail.name){
             MessageEmail(navController)
