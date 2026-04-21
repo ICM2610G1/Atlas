@@ -85,15 +85,7 @@ class ProgresoViewModel: ViewModel(){
     fun updateEnableFecha(estado : Boolean ){
         _progreso.value = _progreso.value.copy(enablefecha =  estado)
     }
-
-
-
-    /*fun updateEmailError(error:String){
-        _authState.value = _authState.value.copy(emailError = error)
-    }
-    */
 }
-
 
 @Composable
 fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel()) {
@@ -172,6 +164,7 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                     fontSize = 19.sp
                 )
             }
+
             TextField(
                 trailingIcon = {
                     IconButton(onClick ={model.updateEnableFecha(true)} ) {
@@ -182,20 +175,12 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                         )
                     }
                 },
-                value = state.fecha, onValueChange = { input ->
-                    val cleaned = input.filter { it.isDigit() }.take(8)
-
-                    val formatted = buildString {
-                        cleaned.forEachIndexed { i, c ->
-                            append(c)
-                            if ((i == 1 || i == 3) && i != cleaned.lastIndex) {
-                                append("/")
-                            }
-                        }
-                    }
-
-                    model.updateFecha(formatted)
-                }, placeholder = {Text("Fecha")},
+                value = state.fecha,
+                onValueChange = { input ->
+                    val soloNumeros = input.replace(Regex("[^0-9/]"), "")
+                    model.updateFecha(soloNumeros)
+                },
+                placeholder = {Text("dd/mm/yyyy")},
                 modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).weight(2F),
                 shape = RoundedCornerShape(14.dp),
                 colors = TextFieldDefaults.colors(
@@ -206,6 +191,7 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                 ),
                 enabled = state.enablefecha
             )
+
             Row(
                 modifier = Modifier.weight(8F)
                     .fillMaxWidth(),
@@ -227,9 +213,8 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                     Text("Tomar foto", fontWeight = FontWeight.Bold)
                 }
 
-
                 Button(
-                    onClick = { /*Aqui se gguarda */ Log.e("TAGuardar","Se guardo ") },
+                    onClick = { Log.e("TAGuardar","Se guardo ") },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.rojoGranada), contentColor = Color.White),
                     shape = RoundedCornerShape(12.dp)
@@ -237,10 +222,10 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                     Text("Guardar")
                 }
             }
-
         }
     }
 }
+
 @Preview (showBackground = true)
 @Composable
 fun PreviewProgreso (){

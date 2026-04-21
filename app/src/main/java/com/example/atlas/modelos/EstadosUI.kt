@@ -85,7 +85,7 @@ data class EstadoMiUbicacion(
     val temperaturaActual: Float = 0f,
     val temperaturaPromedio: Float = 0f,
     val puntosElevacion: List<ElevationPoint> = emptyList(),
-    val tiempoSegundos: Int = 0
+    val tiempoSegundos: Int = 0,
     val puntosRuta: List<LatLng> = emptyList()
 )
 

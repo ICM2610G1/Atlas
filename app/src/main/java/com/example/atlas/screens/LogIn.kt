@@ -1,5 +1,8 @@
 package com.example.atlas.screens
 
+import android.content.Context
+import android.content.ContextWrapper
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -44,11 +47,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.atlas.MainActivity
 import com.example.atlas.R
 import com.example.atlas.auth
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.navegation.AppScreens
-import com.example.atlas.sensores.HelperBiometrico
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -87,8 +90,6 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
     val context = LocalContext.current
     val state by model.authState.collectAsState()
 
-    // HelperBiometrico
-    val helperBiometrico = remember { HelperBiometrico(context) }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -205,49 +206,58 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Botón biométrico
-                if (helperBiometrico.estaDisponible()) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = {
-                                helperBiometrico.autenticar(
-                                    alAutenticar = {
-                                        if (state.email.lowercase().contains("entrenador")) {
-                                            controller.navigate(route = AppScreens.HomeCoach.name)
-                                        } else {
-                                            controller.navigate(route = AppScreens.Home.name)
-                                        }
-                                    },
-                                    alFallar = { mensaje ->
-                                        Toast.makeText(context, mensaje, Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Fingerprint,
-                                contentDescription = "Ingresar con huella",
-                                tint = colorResource(R.color.rojoGranada),
-                                modifier = Modifier.size(52.dp)
-                            )
-                        }
-                        Text("Ingresar con huella", color = colorResource(R.color.rojoGranada), fontSize = 14.sp)
-                    }
-                }
-            }
-        }
 
-        Image(
-            painter = painterResource(id = R.drawable.panter_feliz),
-            contentDescription = "Pantera iniciar sesión",
-            modifier = Modifier
-                .size(165.dp)
-                .align(Alignment.TopEnd)
-                .padding(top = 25.dp, end = 45.dp)
-        )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = {
+                            val actividad = context.findActivity()
+                            actividad?.Authenticate { exito ->
+                                if (exito) {
+                                    controller.navigate(route = AppScreens.Home.name)
+                                } else {
+                                    Toast.makeText(context, "Error de autenticación", Toast.LENGTH_SHORT).show()
+                                }
+
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Fingerprint,
+                            contentDescription = "Ingresar con huella",
+                            tint = colorResource(R.color.rojoGranada),
+                            modifier = Modifier.size(52.dp)
+                        )
+                    }
+                    Text(
+                        "Ingresar con huella",
+                        color = colorResource(R.color.rojoGranada),
+                        fontSize = 14.sp
+                    )
+                }
+
+            }
+
+
+            Image(
+                painter = painterResource(id = R.drawable.panter_feliz),
+                contentDescription = "Pantera iniciar sesión",
+                modifier = Modifier
+                    .size(165.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(top = 25.dp, end = 45.dp)
+            )
+        }
     }
+}
+fun Context.findActivity(): MainActivity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is MainActivity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
 }

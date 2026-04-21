@@ -74,7 +74,7 @@ fun Navigation(){
     val navController = rememberNavController()
     val miUbicacionViewModel: ModeloMiUbicacion = viewModel()
     val EjercicioviewModel: EjercicioViewModel = viewModel()
-    NavHost(navController, startDestination = AppScreens.Home.name){
+    NavHost(navController, startDestination = AppScreens.Appstart.name){
         composable (route= AppScreens.Appstart.name){
             AppStart(navController)
         }
