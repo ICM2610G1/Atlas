@@ -57,8 +57,8 @@ fun Chats(controller: NavController) {
 
         Scaffold(
             topBar = { DefaultTopAppBar("Chats") },
-            bottomBar = {DefaultBottomBarDep(R.color.rojoGranada,controller)},
-            containerColor = colorResource(R.color.rojop)
+            bottomBar = {DefaultBottomBarDep(R.color.white,controller)},
+            containerColor = colorResource(R.color.pink)
         ) { paddingValues ->
             Column(
                 modifier = Modifier.padding(paddingValues).fillMaxSize(),
