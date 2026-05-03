@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,10 +47,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.atlas.auth
@@ -95,38 +98,43 @@ fun DefaultTopAppBar (nombre : String ){
             actionIconContentColor =Color.White ,
         ),
 
-        modifier = Modifier.height(100.dp).clip(shape =  RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp))
+        modifier = Modifier.height(130.dp).clip(shape =  RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp))
    )
 }
+
 @Composable
-fun DefaultBottomBarDep (colorId : Int, controller: NavController ){
-                BottomAppBar(contentPadding = PaddingValues(horizontal = 50.dp),
-                    containerColor = colorResource(colorId),
+fun DefaultBottomBarDep(colorId: Int, controller: NavController) {
+    BottomAppBar(
+        containerColor = colorResource(colorId)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
 
-                    actions = {
-
-                        IconButton(onClick = {controller.navigate(route =AppScreens.Home.name)}, modifier = Modifier.padding(horizontal = 20.dp)) {
-                            Icon(
-                                Icons.Outlined.Home,
-                                contentDescription = "Home",
-                            )
-                        }
-                        IconButton(onClick = { controller.navigate(route= AppScreens.Perfil.name) }, modifier = Modifier.padding(horizontal = 30.dp)) {
-                            Icon(
-                                Icons.Outlined.Person,
-                                contentDescription = "Perfil",
-                            )
-                        }
-                        IconButton(onClick = { controller.navigate(route = AppScreens.Calificar.name) } , modifier = Modifier.padding(horizontal = 10.dp)) {
-                            Icon(
-                                Icons.Outlined.Star,
-                                contentDescription = "Estrella",
-                            )
-                        }
-                    },
-
-                )
+            IconButton(onClick = {controller.navigate(AppScreens.Home.name)})
+            {
+                Icon(Icons.Outlined.Home, contentDescription = "Home")
             }
+            IconButton(onClick = {controller.navigate(AppScreens.Historial.name)})
+            {
+                Icon(painter = painterResource(R.drawable.historial), contentDescription = "Historial")
+            }
+            FloatingActionButton(onClick = {controller.navigate(AppScreens.CrearNuevaSesion.name)},
+                containerColor = colorResource(R.color.rojoGranada))
+            {
+                Text(text = "+", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            }
+
+            IconButton(onClick = {controller.navigate(AppScreens.Chats.name)})
+            {
+                Icon(painter = painterResource(R.drawable.mensajero), contentDescription = "Chats")
+            }
+            IconButton(onClick = {controller.navigate(AppScreens.Progreso.name)})
+            {
+                Icon(painter = painterResource(R.drawable.pesa), contentDescription = "Progreso", modifier = Modifier.size(30.dp))
+            }
+        }
+    }
+}
 @Composable
 fun DefaultBottomBarEnt (colorId : Int, controller: NavController ){
     BottomAppBar(contentPadding = PaddingValues(horizontal = 100.dp),
@@ -191,8 +199,14 @@ fun DefaultTopAppBarHome (nombre : String , controller: NavController){
             actionIconContentColor =Color.White ,
         ),
 
-        modifier = Modifier.height(100.dp).clip(shape =  RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)),
+        modifier = Modifier.height(120.dp).clip(shape =  RoundedCornerShape(bottomStart = 25.dp, bottomEnd = 25.dp)),
         actions = {
+            IconButton(onClick = {
+                controller.navigate(AppScreens.Calificar.name)
+            }) {
+                Icon(Icons.Default.Star, contentDescription = "Calificar")
+            }
+
             IconButton(onClick = {
                 auth.signOut()
                 controller.navigate(AppScreens.LogIn.name){
