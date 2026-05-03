@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.atlas.R
+import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.navegation.AppScreens
 
 data class Sesion(
@@ -56,7 +57,8 @@ fun Historial(controller: NavController) {
         Sesion(6, "Extensión de Tríceps", true)
     )
 
-    Scaffold(topBar = { DefaultTopAppBar("Mis sesiones") })
+    Scaffold(topBar = { DefaultTopAppBar("Mis sesiones") },
+        bottomBar = { DefaultBottomBarDep(R.color.white, controller)})
     { padding ->
         Column(
             modifier = Modifier
