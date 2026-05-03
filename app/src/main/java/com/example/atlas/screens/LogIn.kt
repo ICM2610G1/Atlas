@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -94,7 +95,7 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
                     },
                     colors = TopAppBarDefaults.topAppBarColors(colorResource(R.color.rojoGranada)),
                     modifier = Modifier
-                        .padding(vertical = 40.dp)
+                        .padding(vertical = 30.dp)
                         .padding(horizontal = 10.dp)
                 )
             },
@@ -136,13 +137,6 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
                 )
 
                 TextField(
-                    trailingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.icon_ojo),
-                            contentDescription = "Ojo",
-                            tint = colorResource(R.color.rojoGranada)
-                        )
-                    },
                     value = state.password,
                     onValueChange = { model.updatePassword(it) },
                     placeholder = { Text("Al menos 6 caracteres") },
@@ -230,17 +224,16 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
                 }
 
             }
-
-
-            Image(
-                painter = painterResource(id = R.drawable.panter_feliz),
-                contentDescription = "Pantera iniciar sesión",
-                modifier = Modifier
-                    .size(165.dp)
-                    .align(Alignment.TopEnd)
-                    .padding(top = 25.dp, end = 45.dp)
-            )
         }
+
+        Image(
+            painter = painterResource(id = R.drawable.panter_feliz),
+            contentDescription = "Pantera iniciar sesión",
+            modifier = Modifier
+                .size(140.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = (-50).dp, y = 50.dp)
+        )
     }
 }
 fun Context.findActivity(): MainActivity? {
