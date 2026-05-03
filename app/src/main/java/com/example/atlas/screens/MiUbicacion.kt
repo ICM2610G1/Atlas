@@ -46,7 +46,6 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
     val estado by modelo.estado.collectAsState()
     val contexto = LocalContext.current
 
-
     val sensorLuz = remember {
         sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
     }
@@ -62,8 +61,6 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
     }
-
-
 
     DisposableEffect(Unit) {
         sensorManager.registerListener(listenerLuz, sensorLuz, SensorManager.SENSOR_DELAY_NORMAL)
@@ -131,31 +128,35 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
         }
     }
+
     DisposableEffect(Unit) {
         sensorManager.registerListener(listenerPresion, sensorPresion, SensorManager.SENSOR_DELAY_NORMAL)
         onDispose { sensorManager.unregisterListener(listenerPresion) }
     }
 
     var tiempoSegundos by remember { mutableStateOf(0) }
+
     LaunchedEffect(Unit) {
         while (true) {
             delay(1000L)
             tiempoSegundos++
         }
     }
+
     fun formatearTiempo(segundos: Int): String {
         val h = segundos / 3600
         val m = (segundos % 3600) / 60
         val s = segundos % 60
         return "%02d:%02d:%02d".format(h, m, s)
     }
+
     fun condicionClima(temp: Float): String {
         return when {
             temp < 10f -> "La temperatura es bajo, abrigate"
             temp < 18f -> "Fresco — ideal para trotar"
             temp < 25f -> "Agradable"
             temp < 32f -> "Calor — hidrátate seguido"
-            else       -> "Muy caliente — ten cuidado"
+            else -> "Muy caliente — ten cuidado"
         }
     }
 
@@ -210,8 +211,11 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
         onDispose { locationClient.removeLocationUpdates(locationCallback) }
     }
 
-    LaunchedEffect( final) {
-        if (final.isNotBlank()) modelo.resolverDestino(final)
+    LaunchedEffect(final) {
+        if (final.isNotBlank()) {
+            modelo.limpiarRuta()
+            modelo.resolverDestino(final)
+        }
     }
 
     val posicionCamara = rememberCameraPositionState {
@@ -236,104 +240,107 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
 
     Scaffold(
         topBar = { DefaultTopAppBar("Monitoreo y ubicación de tu actividad") },
-        bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, navController) }
+        bottomBar = { DefaultBottomBarDep(R.color.white, navController) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = paddingValues.calculateBottomPadding())
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(2f)
-                    .padding(horizontal = 30.dp, vertical = 15.dp)
+            GoogleMap(
+                modifier = Modifier.matchParentSize(),
+                cameraPositionState = posicionCamara,
+                properties = MapProperties(
+                    mapStyleOptions = estiloMapa,
+                    isMyLocationEnabled = ContextCompat.checkSelfPermission(
+                        contexto, Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ),
+                uiSettings = MapUiSettings(
+                    zoomControlsEnabled = true,
+                    myLocationButtonEnabled = true
+                )
             ) {
-                GoogleMap(
-                    modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = posicionCamara,
-                    properties = MapProperties(
-                        mapStyleOptions = estiloMapa,
-                        isMyLocationEnabled = ContextCompat.checkSelfPermission(
-                            contexto, Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ),
-                    uiSettings = MapUiSettings(
-                        zoomControlsEnabled = true,
-                        myLocationButtonEnabled = true
+                if (estado.latitud != 0.0 || estado.longitud != 0.0) {
+                    Marker(
+                        state = MarkerState(
+                            position = LatLng(estado.latitud, estado.longitud)
+                        ),
+                        title = "Mi ubicación",
+                        snippet = estado.direccionActual
                     )
-                ) {
-                    if (estado.latitud != 0.0 || estado.longitud != 0.0) {
-                        Marker(
-                            state = MarkerState(
-                                position = LatLng(estado.latitud, estado.longitud)
-                            ),
-                            title = "Mi ubicación",
-                            snippet = estado.direccionActual
-                        )
-                    }
+                }
 
-                    estado.posicionOrigen?.let {
-                        Marker(
-                            state = MarkerState(position = it),
-                            title = "Origen",
-                            snippet = "Ubicacion actual"
-                        )
-                    }
+                estado.posicionOrigen?.let {
+                    Marker(
+                        state = MarkerState(position = it),
+                        title = "Origen",
+                        snippet = "Ubicación actual"
+                    )
+                }
 
-                    if (estado.puntosRuta.isNotEmpty()) {
-                        Polyline(points = estado.puntosRuta, width = 10f, color = colorResource(R.color.rojoGranada))
-                    }
-                    
-                    estado.posicionDestino?.let {
-                        Marker(
-                            state = MarkerState(position = it),
-                            title = "Destino",
-                            snippet = final
-                        )
-                    }
+                if (estado.puntosRuta.isNotEmpty()) {
+                    Polyline(
+                        points = estado.puntosRuta,
+                        width = 10f,
+                        color = colorResource(R.color.rojoGranada)
+                    )
+                }
+
+                estado.posicionDestino?.let {
+                    Marker(
+                        state = MarkerState(position = it),
+                        title = "Destino",
+                        snippet = final
+                    )
                 }
             }
 
             ElevatedCard(
                 modifier = Modifier
-                    .padding(vertical = 15.dp, horizontal = 30.dp)
-                    .weight(1f),
-                colors = CardDefaults.cardColors(containerColor = colorResource(R.color.pink))
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth(0.75f),
+                colors = CardDefaults.cardColors(
+                    containerColor = colorResource(R.color.pink).copy(alpha = 0.85f)
+                )
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth().padding(15.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Box {
-                        Icon(Icons.Default.AccountCircle, "Símbolo de persona",
-                            modifier = Modifier.size(50.dp))
-                        Icon(Icons.Default.CheckCircle, contentDescription = "Estado",
-                            modifier = Modifier.align(Alignment.BottomEnd),
-                            tint = colorResource(R.color.teal_700))
-                    }
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
-                        horizontalAlignment = Alignment.Start
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(estado.direccionActual, fontSize = 14.sp, fontWeight = FontWeight.Bold)
-                        Text("Distancia recorrida: ${estado.distanciaRecorrida} km", fontSize = 12.sp)
-                        Text("Actividad: $actividad", fontSize = 12.sp)
-                        Text("Tiempo: ${formatearTiempo(tiempoSegundos)}", fontSize = 12.sp)
-                        Text("${"%.1f".format(temperaturaActual)}°C — ${condicionClima(temperaturaActual)}", fontSize = 12.sp)
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(5.dp)
+                        ) {
+                            Text(estado.direccionActual, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                            Text("Distancia: ${estado.distanciaRecorrida} km", fontSize = 12.sp)
+                            Text("Actividad: $actividad", fontSize = 12.sp)
+                            Text("Tiempo: ${formatearTiempo(tiempoSegundos)}", fontSize = 12.sp)
+                            Text(
+                                "${"%.1f".format(temperaturaActual)}°C",
+                                fontSize = 12.sp
+                            )
+                            Text("— ${condicionClima(temperaturaActual)}")
+                        }
                     }
-                }
-            }
 
-            Column(
-                modifier = Modifier.weight(1f).fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                DefaulButton("Finalizar actividad", 220, 40) {
-                    navController.navigate(route = AppScreens.CrearNuevaSesion.name)
-                    modelo.actualizarTiempo(tiempoSegundos)
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        DefaulButton("Finalizar actividad", 220, 40) {
+                            navController.navigate(route = AppScreens.CrearNuevaSesion.name)
+                            modelo.actualizarTiempo(tiempoSegundos)
+                        }
+                    }
                 }
             }
         }
     }
 }
-
