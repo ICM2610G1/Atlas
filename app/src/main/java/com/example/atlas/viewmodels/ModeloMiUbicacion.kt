@@ -128,4 +128,13 @@ class ModeloMiUbicacion : ViewModel() {
             }
         }
     }
+
+    fun limpiarRuta() {
+        _estado.update {
+            it.copy(
+                posicionDestino = null,
+                puntosRuta = emptyList()
+            )
+        }
+    }
 }
