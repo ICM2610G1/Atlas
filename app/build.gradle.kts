@@ -79,6 +79,8 @@ dependencies {
     implementation(libs.firebase.database)
     implementation("org.osmdroid:osmdroid-android:6.1.17")
     implementation("com.github.MKergall:osmbonuspack:6.9.0")
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

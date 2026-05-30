@@ -17,7 +17,14 @@ import com.example.atlas.navegation.Navigation
 import com.google.firebase.auth.FirebaseAuth
 
 import androidx.fragment.app.FragmentActivity
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+
 lateinit var auth : FirebaseAuth
+
+lateinit var database : FirebaseDatabase
+lateinit var mStorageRef: StorageReference
 
 lateinit var sensorManager : SensorManager
 lateinit var promptInfo: BiometricPrompt.PromptInfo
@@ -32,13 +39,14 @@ class MainActivity : AppCompatActivity() {
 
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         geocoder = Geocoder(this)
-
+        auth = FirebaseAuth.getInstance()
+        database = FirebaseDatabase.getInstance()
+        mStorageRef = FirebaseStorage.getInstance().getReference()
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
         enableEdgeToEdge()
         setContent {
-            auth = FirebaseAuth.getInstance()
             Navigation()
         }
     }

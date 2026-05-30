@@ -19,10 +19,8 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 class ModeloMiUbicacion : ViewModel() {
-
     private val _estado = MutableStateFlow(EstadoMiUbicacion())
     val estado: StateFlow<EstadoMiUbicacion> = _estado.asStateFlow()
-
     fun registrarInicio(lat: Double, lng: Double) {
         _estado.update { it.copy(latInicio = lat, lngInicio = lng) }
         Log.i("ModeloMiUbicacion", "Inicio registrado: $lat, $lng")
@@ -48,12 +46,40 @@ class ModeloMiUbicacion : ViewModel() {
         _estado.update { it.copy(puntosElevacion = puntosAjustados) }
     }
 
-    fun actualizarPosicion(lat: Double, lng: Double) {
-        val distancia = calcularDistancia(
-            _estado.value.latInicio, _estado.value.lngInicio, lat, lng
-        )
+    fun actualizarPosicion(context: Context, lat: Double, lng: Double) {
+        val distancia = calcularDistancia(_estado.value.latInicio, _estado.value.lngInicio, lat, lng)
         _estado.update {
             it.copy(latitud = lat, longitud = lng, distanciaRecorrida = distancia)
+        }
+        establecerOrigenYRecalcular(context, lat, lng)
+    }
+
+    fun establecerOrigenYRecalcular(context: Context, lat: Double, lng: Double) {
+        _estado.update { it.copy(posicionOrigen = LatLng(lat, lng)) }
+        if (_estado.value.posicionDestino != null) {
+            ejecutarCalculoRuta(context)
+        }
+    }
+    private fun ejecutarCalculoRuta(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val origen = _estado.value.posicionOrigen
+            val destino = _estado.value.posicionDestino
+
+            if (origen != null && destino != null) {
+                try {
+                    val roadManager = org.osmdroid.bonuspack.routing.OSRMRoadManager(context, "ANDROID")
+                    val puntos = arrayListOf(
+                        org.osmdroid.util.GeoPoint(origen.latitude, origen.longitude),
+                        org.osmdroid.util.GeoPoint(destino.latitude, destino.longitude)
+                    )
+                    val road = roadManager.getRoad(puntos)
+                    val puntosRuta = road.mRouteHigh.map { LatLng(it.latitude, it.longitude) }
+
+                    _estado.update { it.copy(puntosRuta = puntosRuta) }
+                } catch (e: Exception) {
+                    Log.e("ModeloMiUbicacion", "Error al calcular la ruta", e)
+                }
+            }
         }
     }
     fun resolverDireccion(context: Context, lat: Double, lng: Double) {

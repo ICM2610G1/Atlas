@@ -54,6 +54,7 @@ import com.example.atlas.auth
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.modelos.Authstate
 import com.example.atlas.navegation.AppScreens
+import com.example.atlas.viewmodels.LoginAuxViewModel
 import com.example.atlas.viewmodels.UserAuthViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -76,7 +77,7 @@ fun validateForm(model: UserAuthViewModel, email: String, password: String): Boo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
+fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel(), model1: LoginAuxViewModel=viewModel()) {
     val context = LocalContext.current
     val state by model.authState.collectAsState()
 
@@ -172,12 +173,26 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel()) {
                         auth.signInWithEmailAndPassword(state.email, state.password)
                             .addOnCompleteListener {
                                 if (it.isSuccessful) {
-                                    if (state.email.lowercase().contains("entrenador")) {
-                                        controller.navigate(route = AppScreens.HomeCoach.name)
-                                    } else {
-                                        controller.navigate(route = AppScreens.Home.name)
-                                    }
-                                } else {
+                                    val user = auth.currentUser?.uid
+                                    user?.let { uid ->
+                                        model1.obtenerTipoCuenta(
+                                            uid = uid,
+                                            onResultado = { tipoCuenta ->
+                                                if (tipoCuenta == "Entrenador") {
+                                                    controller.navigate(route = AppScreens.HomeCoach.name) {
+                                                        popUpTo(AppScreens.Home.name) { inclusive = true }
+                                                    }
+                                                } else {
+                                                    controller.navigate(route = AppScreens.Home.name) {
+                                                        popUpTo(AppScreens.HomeCoach.name) { inclusive = true }
+                                                    }
+                                                }
+                                            },
+                                            onError = { mensajeError ->
+                                                Toast.makeText(context, "Error BD: $mensajeError", Toast.LENGTH_LONG).show()
+                                            }
+                                        )}}
+                                     else {
                                     Toast.makeText(
                                         context, "Login error ${it.exception.toString()}",
                                         Toast.LENGTH_LONG

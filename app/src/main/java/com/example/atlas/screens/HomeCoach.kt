@@ -11,12 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -29,13 +32,14 @@ import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.elements.DefaultTopAppBarHome
 import com.example.atlas.navegation.AppScreens
 
 
 @Composable
 fun HomeCoach(controller : NavController) {
     Scaffold(
-        topBar = { DefaultTopAppBar("Home") },
+        topBar = { DefaultTopAppBarHome("Home", controller) },
         bottomBar = { (DefaultBottomBarEnt(R.color.pink, controller)) }) { paddingValues ->
         Column(
             verticalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterVertically),
@@ -108,6 +112,26 @@ fun HomeCoach(controller : NavController) {
             }
         }
 
+    }
+}
+@Composable
+fun icono_circulo(
+    idRes: Int,
+    contentDescription: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(50.dp)
+            .clip(CircleShape)
+    ) {
+        Image(
+            painter = painterResource(id = idRes),
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(30.dp)
+        )
     }
 }
 @Preview (showBackground = true)

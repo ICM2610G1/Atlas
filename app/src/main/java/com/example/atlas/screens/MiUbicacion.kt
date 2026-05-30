@@ -173,7 +173,7 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
                 modelo.registrarInicio(location.latitude, location.longitude)
                 modelo.establecerOrigen(location.latitude, location.longitude)
             }
-            modelo.actualizarPosicion(location.latitude, location.longitude)
+            modelo.actualizarPosicion(contexto, location.latitude, location.longitude)
             modelo.resolverDireccion(contexto, location.latitude, location.longitude)
         }
     }

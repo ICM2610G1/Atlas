@@ -18,17 +18,19 @@ import com.example.atlas.screens.HomeCoach
 import com.example.atlas.screens.LogIn
 import com.example.atlas.screens.Perfil
 import com.example.atlas.screens.PerfilEnt
-import com.example.atlas.screens.SignUp
 import com.example.atlas.screens.Ubicacion
 import com.example.atlas.screens.ChequeoSesion
 import com.example.atlas.screens.CrearNuevaSesion
 import com.example.atlas.screens.DetallesTrote
+import com.example.atlas.screens.ElegirTipo
 import com.example.atlas.screens.MessageEmail
 import com.example.atlas.screens.MiUbicacion
 import com.example.atlas.screens.Progreso
 import com.example.atlas.screens.RecoverPassword
 import com.example.atlas.screens.ResumenSesion
 import com.example.atlas.screens.ResumenTrote
+import com.example.atlas.screens.SignUpDep
+import com.example.atlas.screens.SignUpEnt
 import com.example.atlas.screens.TroteActivo
 import com.example.atlas.screens.chatP
 import com.example.atlas.screens.vistaSesionesEntrenador
@@ -47,7 +49,9 @@ enum class AppScreens{
     Historial,
     PerfilEnt,
     Calificar,
-    SignUp,
+    SignUpDep,
+    SignUpEnt,
+    Elegirtipo,
     LogIn,
     CrearNuevaSesion,
     detallesTrote,
@@ -126,8 +130,14 @@ fun Navigation(){
         composable (route= AppScreens.Calificar.name){
             Calificar(navController)
         }
-        composable (route= AppScreens.SignUp.name){
-            SignUp(navController)
+        composable (route= AppScreens.SignUpDep.name){
+            SignUpDep(navController)
+        }
+        composable (route= AppScreens.SignUpEnt.name){
+            SignUpEnt(navController)
+        }
+        composable (route= AppScreens.Elegirtipo.name){
+            ElegirTipo(navController)
         }
 
         composable (route= AppScreens.agregarEjercicio.name){

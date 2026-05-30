@@ -64,7 +64,7 @@ fun AppStart (controller : NavController) {
             modifier = Modifier.height(500.dp)
 
         )
-        DefaulButton("¡Comienza a entrenar, registrate!",300,40) {controller.navigate(route = AppScreens.SignUp.name)}
+        DefaulButton("¡Comienza a entrenar, registrate!",300,40) {controller.navigate(route = AppScreens.Elegirtipo.name)}
         Button(onClick = { controller.navigate(route = AppScreens.LogIn.name) },
             modifier = Modifier.width(300.dp).height(40.dp),
             colors = ButtonDefaults.buttonColors(

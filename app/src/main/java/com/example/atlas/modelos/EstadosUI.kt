@@ -98,14 +98,7 @@ data class Authstate(
     val passwordError: String = ""
 )
 
-data class RegisterState(
-    val usuario: String = "",
-    val telefono: String = "",
-    val correo: String = "",
-    val pass: String = "",
-    val mostrarPass: Boolean = false,
-    val aceptar: Boolean = false
-)
+
 
 
 
