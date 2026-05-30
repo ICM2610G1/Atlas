@@ -1,8 +1,5 @@
 package com.example.atlas.screens
 
-import android.R.attr.padding
-import android.text.Layout
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -25,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,65 +32,118 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.atlas.R
+import com.example.atlas.auth
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.viewmodels.ModeloEnviarMensaje
+import com.example.atlas.viewmodels.ModeloMensajesChat
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-data class Mensaje(val contenido: String, val enviado: Boolean, val hora: String)
 @Composable
-fun chatP(contacto: String, controller: NavController) {
+fun chatP(
+    idChat: String,
+    contacto: String,
+    controller: NavController,
+    modeloMensajesChat: ModeloMensajesChat = viewModel(),
+    modeloEnviarMensaje: ModeloEnviarMensaje = viewModel()
+) {
     var mensaje by remember { mutableStateOf("") }
-    val mensajes = listOf(
-        Mensaje("Hola $contacto, ¿Cómo vas?", true, "7:10 am"),
-        Mensaje("Hola, Muy Bien y Tu?", false, "7:29 am"),
-        Mensaje("Bien gracias. Hoy a que hora nos vemos para trotar", true, "7:29 am"),
-        Mensaje("Entreno a las 11?", false, "7:41 am")
-    )
+
+    val mensajes by modeloMensajesChat.mensajes.collectAsState()
+
+    val idUsuarioActual = auth.currentUser?.uid ?: ""
+
+    LaunchedEffect(idChat) {
+        modeloMensajesChat.cargarMensajes(idChat)
+    }
+
     Scaffold(
-        topBar = { DefaultTopAppBar(contacto) },
+        topBar = {
+            DefaultTopAppBar(contacto)
+        },
         containerColor = colorResource(R.color.pink),
-        bottomBar = { DefaultBottomBarDep(R.color.white, controller) }
+        bottomBar = {
+            DefaultBottomBarDep(R.color.white, controller)
+        }
     ) { paddingValues ->
+
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).imePadding()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .imePadding()
         ) {
+
             LazyColumn(
-                modifier = Modifier.fillMaxWidth().padding(paddingValues).weight(1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
             ) {
                 items(mensajes) { item ->
 
-                    val alineacion = if (item.enviado) Alignment.End else Alignment.Start
-                    val color = if (item.enviado) colorResource(R.color.rojos) else colorResource(R.color.rojoGranada)
+                    val mensajeEsMio = item.idEmisor == idUsuarioActual
+
+                    val alineacion = if (mensajeEsMio) {
+                        Alignment.End
+                    } else {
+                        Alignment.Start
+                    }
+
+                    val colorMensaje = if (mensajeEsMio) {
+                        colorResource(R.color.rojos)
+                    } else {
+                        colorResource(R.color.rojoGranada)
+                    }
+
                     Column(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
                         horizontalAlignment = alineacion
                     ) {
                         ElevatedCard(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            colors = CardDefaults.cardColors(color)
+                            colors = CardDefaults.cardColors(
+                                containerColor = colorMensaje
+                            )
                         ) {
-                            Text(item.contenido, modifier = Modifier.padding(8.dp), fontSize = 15.sp, color = Color.White
+                            Text(
+                                text = item.texto,
+                                modifier = Modifier.padding(10.dp),
+                                fontSize = 15.sp,
+                                color = Color.White
                             )
                         }
+
                         Text(
-                            item.hora,
+                            text = formatearHora(item.timestamp),
                             color = colorResource(R.color.black),
-                            modifier = Modifier.padding(5.dp).align(alignment = alineacion)
+                            modifier = Modifier.padding(5.dp),
+                            fontSize = 11.sp
                         )
                     }
                 }
             }
+
             TextField(
                 value = mensaje,
                 onValueChange = { mensaje = it },
-                placeholder = { Text("Mensaje") },
+                placeholder = {
+                    Text("Mensaje")
+                },
                 shape = CircleShape,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 leadingIcon = {
                     Icon(
                         Icons.Default.Face,
-                        contentDescription = "Barra de busqueda"
+                        contentDescription = "Mensaje"
                     )
                 },
                 colors = TextFieldDefaults.colors(
@@ -102,8 +152,20 @@ fun chatP(contacto: String, controller: NavController) {
                     unfocusedPlaceholderColor = Color.Black
                 ),
                 trailingIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar mensaje")
+                    IconButton(
+                        onClick = {
+                            modeloEnviarMensaje.enviarMensaje(
+                                idChat = idChat,
+                                texto = mensaje
+                            )
+
+                            mensaje = ""
+                        }
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Send,
+                            contentDescription = "Enviar mensaje"
+                        )
                     }
                 }
             )
@@ -111,3 +173,11 @@ fun chatP(contacto: String, controller: NavController) {
     }
 }
 
+private fun formatearHora(timestamp: Long): String {
+    if (timestamp == 0L) {
+        return ""
+    }
+
+    val formato = SimpleDateFormat("h:mm a", Locale.getDefault())
+    return formato.format(Date(timestamp))
+}

@@ -1,5 +1,6 @@
 package com.example.atlas.screens
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,93 +36,251 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.atlas.R
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
-import kotlin.collections.getValue
-
-data class vistaMensaje(val nombre: String, val ultimoMensaje: String, val mensajesSinLeer: Int, val tiempo: Int)
-
+import com.example.atlas.objetosDB.ChatDB
+import com.example.atlas.objetosDB.UsuariosGen
+import com.example.atlas.viewmodels.ModeloChatsUsuario
+import com.example.atlas.viewmodels.ModeloCrearChat
+import com.example.atlas.viewmodels.ModeloUsuariosChat
 @Composable
-fun Chats(controller: NavController) {
-        var busqueda by remember{ mutableStateOf("") }
-        var chats: List<vistaMensaje> = listOf<vistaMensaje>(
-            vistaMensaje("Alexander Caneva", "Entreno a las 11?",1, 10),
-            vistaMensaje("Yesid Lemus", "Voy a entrenar despues de clase",3, 50),
-            vistaMensaje("Entrenador Martín", "Te hice ciertos cambios en la rutina de mañana",1,90),
-            vistaMensaje("Alex Hunter", "Entreno a las 11?",1, 10),
-            vistaMensaje("Ansu Fati", "Entreno a las 11?",1, 10),
-            vistaMensaje("Raphael Bellolli Dias", "Entreno a las 11?",1, 10))
+fun Chats(controller: NavController, modeloUsuariosChat: ModeloUsuariosChat = viewModel(), modeloChatsUsuario: ModeloChatsUsuario = viewModel(), modeloCrearChat: ModeloCrearChat = viewModel()
+) {
+    var busqueda by remember { mutableStateOf("") }
 
+    val usuarios by modeloUsuariosChat.usuarios.collectAsState()
+    val chats by modeloChatsUsuario.chats.collectAsState()
 
-        Scaffold(
-            topBar = { DefaultTopAppBar("Chats") },
-            bottomBar = {DefaultBottomBarDep(R.color.white,controller)},
-            containerColor = colorResource(R.color.pink)
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier.padding(paddingValues).fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                TextField(
-                    value = busqueda,
-                    onValueChange = { busqueda = it },
-                    placeholder = { Text("Buscar") },
-                    leadingIcon = {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = "Barra de busqueda"
-                        )
-                    },
-                    modifier = Modifier.padding(30.dp).align(Alignment.Start),
-                    shape = CircleShape,
-                    colors= TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor=Color.White,
-                        focusedIndicatorColor = colorResource(R.color.rojoGranada),
-                        unfocusedPlaceholderColor = Color.Black
+    val chatsFiltrados = chats.filter {
+        it.nombreOtroUsuario.contains(busqueda, ignoreCase = true)
+    }
+
+    val usuariosFiltrados = usuarios.filter {
+        it.nombre.contains(busqueda, ignoreCase = true) ||
+                it.rol.contains(busqueda, ignoreCase = true)
+    }
+
+    Scaffold(
+        topBar = { DefaultTopAppBar("Chats") },
+        bottomBar = { DefaultBottomBarDep(R.color.white, controller) },
+        containerColor = colorResource(R.color.pink)
+    ) { paddingValues ->
+
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            TextField(
+                value = busqueda,
+                onValueChange = { busqueda = it },
+                placeholder = { Text("Buscar") },
+                leadingIcon = {
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = "Barra de busqueda"
                     )
+                },
+                modifier = Modifier
+                    .padding(30.dp)
+                    .align(Alignment.Start),
+                shape = CircleShape,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedIndicatorColor = colorResource(R.color.rojoGranada),
+                    unfocusedPlaceholderColor = Color.Black
                 )
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(chats) { item ->
-                        ElevatedCard(
-                            modifier = Modifier.padding(
-                                top = 5.dp,
-                                bottom = 5.dp
-                            )
-                        ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.Start),
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.fillMaxWidth().clickable {
-                                    controller.navigate(route= AppScreens.chatsP.name + "/${item.nombre}")
-                                }.padding(15.dp)
-                            ) {
-                                Icon(Icons.Default.AccountCircle, "Simbolo de persona", modifier=Modifier.size(50.dp))
-                                Column(modifier= Modifier.weight(1f),
-                                    verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically),
-                                    horizontalAlignment = Alignment.Start) {
-                                    Text(item.nombre, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                    Text(item.ultimoMensaje, fontSize = 12.sp)
+            )
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                item {
+                    Text(
+                        text = "Conversaciones",
+                        modifier = Modifier.padding(
+                            start = 20.dp,
+                            top = 5.dp,
+                            bottom = 5.dp
+                        ),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                if (chatsFiltrados.isEmpty()) {
+                    item {
+                        Text(
+                            text = "Todavía no tienes conversaciones.",
+                            modifier = Modifier.padding(start = 20.dp, bottom = 10.dp),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
+                items(chatsFiltrados) { item ->
+                    ElevatedCard(
+                        modifier = Modifier.padding(
+                            top = 5.dp,
+                            bottom = 5.dp
+                        )
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(
+                                10.dp,
+                                Alignment.Start
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    val nombreSeguro = Uri.encode(item.nombreOtroUsuario)
+
+                                    controller.navigate(
+                                        route = AppScreens.chatsP.name +
+                                                "/${item.idChat}/$nombreSeguro"
+                                    )
                                 }
-                                Column(horizontalAlignment = Alignment.End) {
-                                    Text("${item.tiempo} min")
-                                    Box(
-                                        modifier = Modifier.size(20.dp).background(colorResource(id = R.color.rojoGranada)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text("${item.mensajesSinLeer}", color=Color.White)
-                                    }
+                                .padding(15.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = "Simbolo de persona",
+                                modifier = Modifier.size(50.dp)
+                            )
+
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(
+                                    5.dp,
+                                    Alignment.CenterVertically
+                                ),
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                Text(
+                                    text = item.nombreOtroUsuario,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Text(
+                                    text = if (item.ultimoMensaje.isBlank()) {
+                                        "Chat creado"
+                                    } else {
+                                        item.ultimoMensaje
+                                    },
+                                    fontSize = 12.sp
+                                )
+                            }
+
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("Ahora")
+
+                                Box(
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                        .background(
+                                            colorResource(id = R.color.rojoGranada)
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "",
+                                        color = Color.White
+                                    )
                                 }
                             }
                         }
                     }
                 }
-            }
 
+                item {
+                    Text(
+                        text = "Usuarios",
+                        modifier = Modifier.padding(
+                            start = 20.dp,
+                            top = 15.dp,
+                            bottom = 5.dp
+                        ),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                if (usuariosFiltrados.isEmpty()) {
+                    item {
+                        Text(
+                            text = "No hay usuarios disponibles.",
+                            modifier = Modifier.padding(start = 20.dp, bottom = 10.dp),
+                            fontSize = 13.sp
+                        )
+                    }
+                }
+
+                items(usuariosFiltrados) { usuario ->
+                    ElevatedCard(
+                        modifier = Modifier.padding(
+                            top = 5.dp,
+                            bottom = 5.dp
+                        )
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(
+                                10.dp,
+                                Alignment.Start
+                            ),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    modeloCrearChat.crearChat(usuario) { idChat, nombre ->
+                                        val nombreSeguro = Uri.encode(nombre)
+
+                                        controller.navigate(
+                                            route = AppScreens.chatsP.name +
+                                                    "/$idChat/$nombreSeguro"
+                                        )
+                                    }
+                                }
+                                .padding(15.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.AccountCircle,
+                                contentDescription = "Simbolo de persona",
+                                modifier = Modifier.size(50.dp)
+                            )
+
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(
+                                    5.dp,
+                                    Alignment.CenterVertically
+                                ),
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                Text(
+                                    text = usuario.nombre,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+
+                                Text(
+                                    text = usuario.rol,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
+}

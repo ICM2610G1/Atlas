@@ -91,9 +91,15 @@ fun Navigation(){
         composable (route= AppScreens.Chats.name){
             Chats(navController)
         }
-        composable(route= AppScreens.chatsP.name + "/{nombre}") {  backStackEntry ->
+        composable(route = AppScreens.chatsP.name + "/{idChat}/{nombre}") { backStackEntry ->
+
+            val idChat = backStackEntry.arguments?.getString("idChat") ?: ""
             val nombre = backStackEntry.arguments?.getString("nombre") ?: ""
-            chatP(nombre, navController)
+            chatP(
+                idChat = idChat,
+                contacto = nombre,
+                controller = navController
+            )
         }
         composable(route= AppScreens.vistaSesionesEnt.name) {
             vistaSesionesEntrenador(navController)
