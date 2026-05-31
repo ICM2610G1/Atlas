@@ -1,16 +1,20 @@
 package com.example.atlas.screens
 
 import android.Manifest
+import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
+import android.net.Uri
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.CheckCircle
@@ -18,6 +22,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +32,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
@@ -40,12 +49,13 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.delay
+import org.json.JSONObject
 
 @Composable
 fun MiUbicacion(navController: NavController, final: String="", actividad: String="", modelo: ModeloMiUbicacion = viewModel()) {
     val estado by modelo.estado.collectAsState()
     val contexto = LocalContext.current
-
+    var placeUrl by remember { mutableStateOf<String?>(null) }
     val sensorLuz = remember {
         sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
     }
@@ -237,6 +247,11 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
             modelo.calcularRuta(contexto)
         }
     }
+    LaunchedEffect(Unit) {
+        loadPlacePhoto(contexto, final) { photoUrl ->
+           placeUrl =  photoUrl
+        }
+    }
 
     Scaffold(
         topBar = { DefaultTopAppBar("Monitoreo y ubicación de tu actividad") },
@@ -245,7 +260,8 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(
+                    bottom = paddingValues.calculateBottomPadding())
         ) {
             GoogleMap(
                 modifier = Modifier.matchParentSize(),
@@ -295,6 +311,26 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
                     )
                 }
             }
+            ElevatedCard(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(
+                        start = 8.dp,
+                        top = paddingValues.calculateTopPadding() + 8.dp
+                    )
+                    .size(150.dp),
+                shape = RoundedCornerShape(10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Transparent
+                )
+            ) {
+                AsyncImage(
+                    model = placeUrl,
+                    contentDescription = final,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             ElevatedCard(
                 modifier = Modifier
@@ -343,4 +379,42 @@ fun MiUbicacion(navController: NavController, final: String="", actividad: Strin
             }
         }
     }
+}
+fun loadPlacePhoto(context: Context, placeName: String, onSuccess: (String) -> Unit) {
+
+    val apiKey = context.packageManager
+        .getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+        .metaData
+        .getString("com.google.android.geo.API_KEY") ?: ""
+    val url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json" +
+            "?input=$placeName" +
+            "&fields=photos"+
+            "&inputtype=textquery" +
+            "&key=$apiKey"
+
+    val queue = Volley.newRequestQueue(context)
+
+    val request = StringRequest(
+        url,
+        { response ->
+            Log.i("PLACES", response)
+            val json = JSONObject(response)
+            val photoReference = json
+                .getJSONArray("candidates")
+                .getJSONObject(0)
+                .getJSONArray("photos")
+                .getJSONObject(0)
+                .getString("photo_reference")
+
+            val imageUrl = "https://maps.googleapis.com/maps/api/place/photo" +
+                    "?maxwidth=400" +
+                    "&photo_reference=$photoReference" +
+                    "&key=$apiKey"
+
+            onSuccess(imageUrl)
+        },
+        { Log.e("PLACES", "Error: ${it.message}") }
+    )
+
+    queue.add(request)
 }

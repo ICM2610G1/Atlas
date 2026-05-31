@@ -31,7 +31,6 @@ android {
         val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -65,6 +64,7 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("com.android.volley:volley:1.2.1")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.gms:play-services-location:21.3.0")
