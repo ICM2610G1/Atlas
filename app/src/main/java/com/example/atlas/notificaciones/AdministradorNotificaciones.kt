@@ -39,6 +39,7 @@ object AdministradorNotificaciones {
     ) {
         val intent = Intent(context, MainActivity::class.java)
 
+        intent.putExtra("tipo", "chat")
         intent.putExtra("idChat", idChat)
         intent.putExtra("nombre", nombre)
 
@@ -47,9 +48,9 @@ object AdministradorNotificaciones {
 
         val pendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            idChat.hashCode(),
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val notification: Notification = NotificationCompat.Builder(
@@ -64,6 +65,43 @@ object AdministradorNotificaciones {
             .build()
 
         val notManager = context.getSystemService<NotificationManager>()
-        notManager?.notify(1, notification)
+        notManager?.notify(idChat.hashCode(), notification)
+    }
+
+    fun mostrarNotificacionTrote(
+        context: Context,
+        idDeportista: String,
+        nombreDeportista: String,
+        texto: String
+    ) {
+        val intent = Intent(context, MainActivity::class.java)
+
+        intent.putExtra("tipo", "trote")
+        intent.putExtra("idDeportista", idDeportista)
+        intent.putExtra("nombreDeportista", nombreDeportista)
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            idDeportista.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification: Notification = NotificationCompat.Builder(
+            context,
+            NOTIFICATION_CHANNEL_ID
+        )
+            .setContentTitle("$nombreDeportista inició una actividad")
+            .setContentText(texto)
+            .setSmallIcon(R.drawable.mensajero)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        val notManager = context.getSystemService<NotificationManager>()
+        notManager?.notify(idDeportista.hashCode(), notification)
     }
 }

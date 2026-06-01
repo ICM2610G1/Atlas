@@ -1,4 +1,4 @@
-const { onValueCreated } = require("firebase-functions/database");
+const { onValueCreated, onValueUpdated } = require("firebase-functions/database");
 const { logger } = require("firebase-functions");
 const admin = require("firebase-admin");
 
@@ -88,6 +88,7 @@ exports.enviarNotificacionMensaje = onValueCreated(
     const payload = {
       tokens: tokens,
       data: {
+        tipo: "chat",
         idChat: String(idChat),
         nombre: String(nombreEmisor),
         texto: String(texto),
@@ -102,6 +103,113 @@ exports.enviarNotificacionMensaje = onValueCreated(
     logger.log("Notificación enviada", {
       successCount: respuesta.successCount,
       failureCount: respuesta.failureCount,
+    });
+
+    return null;
+  }
+);
+
+exports.enviarNotificacionTrote = onValueUpdated(
+  "/ubicacionUsuario/{idDeportista}/disponible",
+  async (event) => {
+    const disponibleAntes = event.data.before.val();
+    const disponibleAhora = event.data.after.val();
+
+    const idDeportista = event.params.idDeportista;
+
+    logger.log("Cambio en disponibilidad detectado", {
+      idDeportista,
+      disponibleAntes,
+      disponibleAhora,
+    });
+
+    if (disponibleAntes === true || disponibleAhora !== true) {
+      logger.log("No es inicio de trote, no se envía notificación");
+      return null;
+    }
+
+    const db = admin.database();
+
+    const ubicacionSnapshot = await db
+      .ref(`ubicacionUsuario/${idDeportista}`)
+      .get();
+
+    if (!ubicacionSnapshot.exists()) {
+      logger.log("No existe ubicación del deportista", {
+        idDeportista,
+      });
+      return null;
+    }
+
+    const ubicacion = ubicacionSnapshot.val();
+
+    const nombreDeportista = ubicacion.nombre || "Un deportista";
+    const tipoActividad = ubicacion.tipoActividad || "actividad";
+
+    const deportistaSnapshot = await db
+      .ref(`deportistas/${idDeportista}/entrenadores`)
+      .get();
+
+    if (!deportistaSnapshot.exists()) {
+      logger.log("El deportista no tiene entrenadores asociados", {
+        idDeportista,
+      });
+      return null;
+    }
+
+    const entrenadoresObjeto = deportistaSnapshot.val();
+    const idsEntrenadores = Object.values(entrenadoresObjeto || {});
+
+    if (idsEntrenadores.length === 0) {
+      logger.log("Lista de entrenadores vacía", {
+        idDeportista,
+      });
+      return null;
+    }
+
+    const tokens = [];
+
+    for (const idEntrenador of idsEntrenadores) {
+      const tokensSnapshot = await db
+        .ref(`tokensFCM/${idEntrenador}`)
+        .get();
+
+      if (tokensSnapshot.exists()) {
+        const tokensObjeto = tokensSnapshot.val();
+        const tokensEntrenador = Object.keys(tokensObjeto || {});
+        tokens.push(...tokensEntrenador);
+      }
+    }
+
+    if (tokens.length === 0) {
+      logger.log("No hay tokens FCM para los entrenadores", {
+        idsEntrenadores,
+      });
+      return null;
+    }
+
+    const texto = `${nombreDeportista} inició ${tipoActividad}, ¿quieres ver dónde está?`;
+
+    const payload = {
+      tokens: tokens,
+      data: {
+        tipo: "trote",
+        idDeportista: String(idDeportista),
+        nombreDeportista: String(nombreDeportista),
+        tipoActividad: String(tipoActividad),
+        texto: String(texto),
+      },
+      android: {
+        priority: "high",
+      },
+    };
+
+    const respuesta = await admin.messaging().sendEachForMulticast(payload);
+
+    logger.log("Notificación de trote enviada", {
+      successCount: respuesta.successCount,
+      failureCount: respuesta.failureCount,
+      cantidadTokens: tokens.length,
     });
 
     return null;

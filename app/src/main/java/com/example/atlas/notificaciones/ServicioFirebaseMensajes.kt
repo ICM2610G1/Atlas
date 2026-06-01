@@ -27,6 +27,24 @@ class ServicioFirebaseMensajes : FirebaseMessagingService() {
         Log.d("FCM_ATLAS", "Mensaje recibido desde FCM")
         Log.d("FCM_ATLAS", "Data: ${message.data}")
 
+        val tipo = message.data["tipo"] ?: "chat"
+
+        if (tipo == "trote") {
+            val idDeportista = message.data["idDeportista"] ?: return
+            val nombreDeportista = message.data["nombreDeportista"] ?: "Un deportista"
+            val texto = message.data["texto"]
+                ?: "$nombreDeportista está trotando, ¿quieres ver dónde está?"
+
+            AdministradorNotificaciones.mostrarNotificacionTrote(
+                context = this,
+                idDeportista = idDeportista,
+                nombreDeportista = nombreDeportista,
+                texto = texto
+            )
+
+            return
+        }
+
         val idChat = message.data["idChat"] ?: return
         val nombre = message.data["nombre"] ?: "Nuevo mensaje"
         val texto = message.data["texto"] ?: "Te enviaron un mensaje"

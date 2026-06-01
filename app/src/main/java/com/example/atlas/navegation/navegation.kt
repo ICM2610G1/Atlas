@@ -1,5 +1,6 @@
 package com.example.atlas.navegation
 
+import com.example.atlas.notificaciones.TrotePendienteNotificacion
 import androidx.compose.runtime.LaunchedEffect
 import com.example.atlas.notificaciones.ChatPendienteNotificacion
 import EjercicioViewModel
@@ -93,6 +94,15 @@ fun Navigation(){
             navController.navigate("${AppScreens.chatsP.name}/$idChat/$nombre")
 
             ChatPendienteNotificacion.limpiar()
+        }
+    }
+    LaunchedEffect(Unit) {
+        if (TrotePendienteNotificacion.hayTrotePendiente()) {
+            val idDeportista = TrotePendienteNotificacion.idDeportista
+
+            navController.navigate("${AppScreens.Ubicacion.name}/$idDeportista")
+
+            TrotePendienteNotificacion.limpiar()
         }
     }
     NavHost(navController, startDestination = AppScreens.Appstart.name){

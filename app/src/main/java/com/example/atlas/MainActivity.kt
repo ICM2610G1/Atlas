@@ -1,5 +1,6 @@
 package com.example.atlas
 
+import com.example.atlas.notificaciones.TrotePendienteNotificacion
 import android.Manifest
 import android.hardware.SensorManager
 import android.location.Geocoder
@@ -61,14 +62,28 @@ class MainActivity : AppCompatActivity() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        val idChatDesdeNotificacion = intent.getStringExtra("idChat") ?: ""
-        val nombreDesdeNotificacion = intent.getStringExtra("nombre") ?: ""
+        val tipoNotificacion = intent.getStringExtra("tipo") ?: "chat"
 
-        if (idChatDesdeNotificacion.isNotBlank()) {
-            ChatPendienteNotificacion.guardar(
-                idChatNuevo = idChatDesdeNotificacion,
-                nombreNuevo = nombreDesdeNotificacion
-            )
+        if (tipoNotificacion == "trote") {
+            val idDeportistaDesdeNotificacion = intent.getStringExtra("idDeportista") ?: ""
+            val nombreDeportistaDesdeNotificacion = intent.getStringExtra("nombreDeportista") ?: ""
+
+            if (idDeportistaDesdeNotificacion.isNotBlank()) {
+                TrotePendienteNotificacion.guardar(
+                    idDeportistaNuevo = idDeportistaDesdeNotificacion,
+                    nombreDeportistaNuevo = nombreDeportistaDesdeNotificacion
+                )
+            }
+        } else {
+            val idChatDesdeNotificacion = intent.getStringExtra("idChat") ?: ""
+            val nombreDesdeNotificacion = intent.getStringExtra("nombre") ?: ""
+
+            if (idChatDesdeNotificacion.isNotBlank()) {
+                ChatPendienteNotificacion.guardar(
+                    idChatNuevo = idChatDesdeNotificacion,
+                    nombreNuevo = nombreDesdeNotificacion
+                )
+            }
         }
 
         enableEdgeToEdge()
