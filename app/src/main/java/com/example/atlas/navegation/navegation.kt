@@ -23,7 +23,6 @@ import com.example.atlas.screens.LogIn
 import com.example.atlas.screens.Perfil
 import com.example.atlas.screens.PerfilEnt
 import com.example.atlas.screens.Ubicacion
-//import com.example.atlas.screens.ChequeoSesion
 import com.example.atlas.screens.CrearNuevaSesion
 import com.example.atlas.screens.DetallesTrote
 import com.example.atlas.screens.ElegirTipo
@@ -67,7 +66,6 @@ enum class AppScreens{
     vistaSesionesEnt,
     ResumenSesion,
     RecoverPassword,
-    // AppFinal,
     MessageEmail,
     troteActivo,
     ResumenTrote,
@@ -170,8 +168,9 @@ fun Navigation(){
         composable (route= AppScreens.LogIn.name){
             LogIn(navController)
         }
-        composable (route= AppScreens.DetalleSesion.name){
-            DetalleSesion(navController)
+        composable (route= AppScreens.DetalleSesion.name+"/{idSesion}"){ backStackEntry ->
+            val idSesion = backStackEntry.arguments?.getString("idSesion") ?: ""
+            DetalleSesion(navController, idSesion)
         }
         composable (route= AppScreens.RecoverPassword.name){
             RecoverPassword(navController)
@@ -204,7 +203,3 @@ fun Navigation(){
     }
 
 }
-
-
-
-

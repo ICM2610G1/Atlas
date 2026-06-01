@@ -5,6 +5,8 @@ import com.example.atlas.modelos.ElevationPoint
 
 
 data class Sesion(
+    val userId: String = "",
+    val fecha: String = "",
     val completado: Boolean = false,
     val caloriasQuemadas: Double = 0.0,
     val duracion: Int = 0,

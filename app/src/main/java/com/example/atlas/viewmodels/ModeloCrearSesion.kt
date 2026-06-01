@@ -2,11 +2,15 @@ package com.example.atlas.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.atlas.auth
 import com.example.atlas.database
 import com.example.atlas.objetosDB.Sesion
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class CrearSesionUiState(
     val idSesionActiva: String = "",
@@ -27,12 +31,20 @@ class CrearSesionViewModel : ViewModel() {
     }
 
     fun crearSesion() {
-        if (_uiState.value.idSesionActiva.isNotEmpty()) return //esto es para que cada que entre a la pantalla no se resete el pushkey
+        if (_uiState.value.idSesionActiva.isNotEmpty()) return
 
+        val uid = auth.currentUser?.uid ?: ""
+        val fecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+        
         val refSesiones = database.getReference("Sesiones")
         val nuevoId = refSesiones.push().key
         if (nuevoId!=null) {
-            refSesiones.child(nuevoId).setValue(Sesion())
+            val nuevaSesion = Sesion(
+                userId = uid,
+                fecha = fecha,
+                completado = false
+            )
+            refSesiones.child(nuevoId).setValue(nuevaSesion)
                 .addOnSuccessListener {
                     _uiState.update { it.copy(idSesionActiva = nuevoId) }
                     Log.i("DEBUG_SESION", "idSesionActiva listo: $nuevoId")

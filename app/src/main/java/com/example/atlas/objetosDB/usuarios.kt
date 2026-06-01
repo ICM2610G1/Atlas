@@ -24,10 +24,18 @@ data class Entrenador (
     val id: String ="",
     val imagen: String ="",
     val nombre: String ="",
-    val fechaNacimiento: String,
+    val fechaNacimiento: String = "",
     val telefono: String = "",
     val correo: String ="",
     val anosProfesionales: Double =0.0,
     val especialidad: String ="",
     val calificacionPromedio: Double =0.0
+)
+
+data class Valoracion(
+    val idDeportista: String = "",
+    val idEntrenador: String = "",
+    val calificacion: Int = 0,
+    val comentario: String = "",
+    val fecha: String = ""
 )
