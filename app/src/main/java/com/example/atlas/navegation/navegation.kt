@@ -26,6 +26,7 @@ import com.example.atlas.screens.Ubicacion
 import com.example.atlas.screens.CrearNuevaSesion
 import com.example.atlas.screens.DetallesTrote
 import com.example.atlas.screens.ElegirTipo
+import com.example.atlas.screens.Evolucion
 import com.example.atlas.screens.MessageEmail
 import com.example.atlas.screens.MiUbicacion
 import com.example.atlas.screens.Progreso
@@ -72,7 +73,8 @@ enum class AppScreens{
 
     agregarEjercicio,
     Camara,
-    Progreso
+    Progreso,
+    Evolucion
 
 }
 
@@ -134,6 +136,9 @@ fun Navigation(){
             CatalogoActividades(controller = navController, modelE = ejercicioViewModel)
         }
 
+        composable (route= AppScreens.ChequeoSesion.name){
+            ChequeoSesion(controller = navController, viewModel = ejercicioViewModel)
+        }
         composable (route= AppScreens.ChequeoSesion.name){
             ChequeoSesion(controller = navController, viewModel = ejercicioViewModel)
         }
@@ -199,6 +204,9 @@ fun Navigation(){
         }
         composable (route = AppScreens.Camara.name){
             Camara (navController)
+        }
+        composable (route= AppScreens.Evolucion.name){
+            Evolucion(navController)
         }
 
     }

@@ -36,7 +36,6 @@ class ModeloHistorial : ViewModel() {
                             lista.add(SesionConId(child.key ?: "", it))
                         }
                     }
-                    // Ordenar por fecha o ID (descendente para ver las más recientes primero)
                     _sesiones.value = lista.reversed()
                 }
 

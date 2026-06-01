@@ -32,81 +32,81 @@ import com.example.atlas.R
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
+import com.example.atlas.viewmodels.ProgresoViewModel
 import java.io.File
 
 @Composable
-
-fun Camara(controller: NavController) {
-
+fun Camara(controller: NavController, model: ProgresoViewModel = viewModel()) {
 
     val context = LocalContext.current
-    val UriCamara = FileProvider.getUriForFile(
-        context,
-        "com.example.atlas.fileprovider",
-        File(context.filesDir, "Camerapic.jpg")
-    )
-    var UriImagen by remember { mutableStateOf<Uri?>(null) }
-    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture())
-    { it ->
-        if (it) {
-            UriImagen = UriCamara
-        }
+    val uriCamara = remember {
+        FileProvider.getUriForFile(
+            context,
+            "com.example.atlas.fileprovider",
+            File(context.filesDir, "Camerapic.jpg")
+        )
     }
 
+    var uriImagen by remember { mutableStateOf<Uri?>(null) }
+    val state by model.progreso.collectAsState()
 
-    var galeria =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { result ->
-            UriImagen = result
-        }
+    val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
+        if (ok) uriImagen = uriCamara
+    }
+
+    val galeria = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { result ->
+        uriImagen = result
+    }
 
     Scaffold(
         topBar = { DefaultTopAppBar("Foto") },
-        bottomBar = { (DefaultBottomBarDep(R.color.pink, controller)) }) { paddingValues ->
+        bottomBar = { DefaultBottomBarDep(R.color.pink, controller) }
+    ) { paddingValues ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(20.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(30.dp, Alignment.CenterVertically)
-
         ) {
-            if (UriImagen != null) {
+            if (uriImagen != null) {
                 AsyncImage(
-                    model = UriImagen,
-                    contentDescription = "foto recuperada",
+                    model = uriImagen,
+                    contentDescription = "Foto seleccionada",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(300.dp).fillMaxWidth()
-
+                    modifier = Modifier.size(300.dp)
                 )
             } else {
                 Image(
                     painter = painterResource(R.drawable.oso_megafono),
-                    contentDescription = "Foto",
+                    contentDescription = "Foto placeholder",
                     modifier = Modifier.size(300.dp)
                 )
             }
+
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 5.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
                 DefaulButton("Galeria", 100, 40) {
                     galeria.launch("image/*")
-
                 }
                 DefaulButton("Camara", 100, 40) {
-                    camera.launch(UriCamara)
+                    camera.launch(uriCamara)
                 }
                 DefaulButton("Subir", 100, 40) {
-                    Log.i("TAGuardarFt","Guardo la foto ")
+                    uriImagen?.let { uri ->
+                        model.subirFoto(uri)
+                        controller.popBackStack()
+                    }
                 }
-
-
             }
-
-
         }
     }
 }

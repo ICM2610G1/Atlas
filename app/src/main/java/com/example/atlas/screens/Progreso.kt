@@ -57,17 +57,25 @@ import com.example.atlas.viewmodels.ProgresoViewModel
 
 
 @Composable
-fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel()) {
+fun Progreso(controller: NavController, model: ProgresoViewModel = viewModel()) {
     val state by model.progreso.collectAsState()
+
     Scaffold(
         topBar = { DefaultTopAppBar("Progreso") },
-        bottomBar = { (DefaultBottomBarDep(R.color.pink, controller)) }) { paddingValues ->
+        bottomBar = { DefaultBottomBarDep(R.color.pink, controller) }
+    ) { paddingValues ->
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal =25.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 25.dp)
         ) {
-            Row(modifier = Modifier.weight(1F).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     "Establezca su objetivo",
                     fontWeight = FontWeight.Medium,
@@ -77,17 +85,16 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
             }
 
             TextField(
+                value = state.objetivo,
+                onValueChange = { model.updateObjetivo(it) },
+                placeholder = { Text("objetivo") },
                 trailingIcon = {
-                    IconButton(onClick ={model.updateEnableObjetivo(true)} ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar",
-                            tint = colorResource(R.color.rojoGranada)
-                        )
+                    IconButton(onClick = { model.updateEnableObjetivo(true) }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar",
+                            tint = colorResource(R.color.rojoGranada))
                     }
                 },
-                value = state.objetivo, onValueChange = {model.updateObjetivo(it)}, placeholder = {Text("objetivo")},
-                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).weight(2F),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).weight(2f),
                 shape = RoundedCornerShape(14.dp),
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = colorResource(R.color.white),
@@ -98,25 +105,28 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                 enabled = state.enableObjetivo
             )
 
-            Row(modifier = Modifier.weight(1F).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     "Ingrese su meta calorica",
                     fontWeight = FontWeight.Medium,
                     fontSize = 19.sp
                 )
             }
+
             TextField(
+                value = state.metaCalorica,
+                onValueChange = { model.updateMetaCaloria(it) },
+                placeholder = { Text("calorias") },
                 trailingIcon = {
-                    IconButton(onClick ={model.updateEnableMetacaloria(true)} ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar",
-                            tint = colorResource(R.color.rojoGranada)
-                        )
+                    IconButton(onClick = { model.updateEnableMetacalorica(true) }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar",
+                            tint = colorResource(R.color.rojoGranada))
                     }
                 },
-                value = state.metaCalorica, onValueChange = {model.updateMetaCaloria(it)}, placeholder = {Text("calorias")},
-                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).weight(2F),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).weight(2f),
                 shape = RoundedCornerShape(14.dp),
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = colorResource(R.color.white),
@@ -124,9 +134,13 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                     unfocusedPlaceholderColor = Color.Gray,
                     focusedPlaceholderColor = Color.Gray
                 ),
-                enabled = state.enablemetacalorica
+                enabled = state.enableMetacalorica
             )
-            Row(modifier = Modifier.weight(1F).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+
+            Row(
+                modifier = Modifier.weight(1f).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     "Ingrese la fecha",
                     fontWeight = FontWeight.Medium,
@@ -135,22 +149,16 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
             }
 
             TextField(
+                value = state.fecha,
+                onValueChange = {model.updateFecha(it)},
+                placeholder = { Text("dd/mm/yyyy") },
                 trailingIcon = {
-                    IconButton(onClick ={model.updateEnableFecha(true)} ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar",
-                            tint = colorResource(R.color.rojoGranada)
-                        )
+                    IconButton(onClick = { model.updateEnableFecha(true) }) {
+                        Icon(Icons.Default.Edit, contentDescription = "Editar",
+                            tint = colorResource(R.color.rojoGranada))
                     }
                 },
-                value = state.fecha,
-                onValueChange = { input ->
-                    val soloNumeros = input.replace(Regex("[^0-9/]"), "")
-                    model.updateFecha(soloNumeros)
-                },
-                placeholder = {Text("dd/mm/yyyy")},
-                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).weight(2F),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp).weight(2f),
                 shape = RoundedCornerShape(14.dp),
                 colors = TextFieldDefaults.colors(
                     unfocusedContainerColor = colorResource(R.color.white),
@@ -158,21 +166,17 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                     unfocusedPlaceholderColor = Color.Gray,
                     focusedPlaceholderColor = Color.Gray
                 ),
-                enabled = state.enablefecha
+                enabled = state.enableFecha
             )
 
             Row(
-                modifier = Modifier.weight(8F)
-                    .fillMaxWidth(),
+                modifier = Modifier.weight(8f).fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-
                 Button(
-                    onClick = {controller.navigate(AppScreens.Camara.name)},
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp),
+                    onClick = { controller.navigate(AppScreens.Camara.name) },
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorResource(R.color.rojoGranada),
                         contentColor = Color.White
@@ -181,11 +185,24 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
                 ) {
                     Text("Tomar foto", fontWeight = FontWeight.Bold)
                 }
-
                 Button(
-                    onClick = { Log.e("TAGuardar","Se guardo ") },
+                    onClick = { controller.navigate(AppScreens.Evolucion.name) },
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.rojoGranada),
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Ver evolucion", fontWeight = FontWeight.Bold)
+                }
+                Button(
+                    onClick = { model.guardarDatos() },
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.rojoGranada), contentColor = Color.White),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(R.color.rojoGranada),
+                        contentColor = Color.White
+                    ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("Guardar")
@@ -195,9 +212,9 @@ fun Progreso (controller : NavController , model : ProgresoViewModel = viewModel
     }
 }
 
-@Preview (showBackground = true)
+@Preview(showBackground = true)
 @Composable
-fun PreviewProgreso (){
+fun PreviewProgreso() {
     val nc = rememberNavController()
     Progreso(nc)
 }
