@@ -43,6 +43,7 @@ import com.example.atlas.navegation.AppScreens
 import com.example.atlas.objetosDB.Deportista
 import com.example.atlas.objetosDB.UsuariosGen
 import com.example.atlas.viewmodels.DepRegisterViewModel
+import com.example.atlas.viewmodels.ubicacionUsuario
 import com.example.atlas.viewmodels.validateDepRegisterForm
 import com.google.firebase.auth.UserProfileChangeRequest
 import java.io.File
@@ -322,6 +323,16 @@ fun SignUpDep(controller: NavController , model : DepRegisterViewModel = viewMod
                                                                 state.correo,
                                                             )
                                                             dbRef2.setValue(copia)
+                                                            val ubicacion = ubicacionUsuario(
+                                                                id = user,
+                                                                nombre = state.nombre,
+                                                                imagen = url,
+                                                                disponible = false,
+                                                                lat = 0.0,
+                                                                long = 0.0
+                                                            )
+                                                            val dbRef3 = database.getReference("ubicacionUsuario/$user")
+                                                            dbRef3.setValue(ubicacion)
                                                             controller.navigate(route = AppScreens.Home.name) {
                                                                 popUpTo(AppScreens.SignUpDep.name) {
                                                                     inclusive = true
@@ -356,6 +367,16 @@ fun SignUpDep(controller: NavController , model : DepRegisterViewModel = viewMod
                                                         state.correo
                                                     )
                                                     dbRef2.setValue(copia)
+                                                    val ubicacion = ubicacionUsuario(
+                                                        id = user,
+                                                        nombre = state.nombre,
+                                                        imagen = "",
+                                                        disponible = false,
+                                                        lat = 0.0,
+                                                        long = 0.0
+                                                    )
+                                                    val dbRef3 = database.getReference("ubicacionUsuario/$user")
+                                                    dbRef3.setValue(ubicacion)
                                                     controller.navigate(route = AppScreens.Home.name) {
                                                         popUpTo(AppScreens.SignUpDep.name) {
                                                             inclusive = true

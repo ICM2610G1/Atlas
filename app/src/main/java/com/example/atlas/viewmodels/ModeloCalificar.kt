@@ -3,7 +3,6 @@ package com.example.atlas.viewmodels
 import androidx.lifecycle.ViewModel
 import com.example.atlas.auth
 import com.example.atlas.database
-import com.example.atlas.modelos.EstadoCalificar
 import com.example.atlas.objetosDB.Entrenador
 import com.example.atlas.objetosDB.Valoracion
 import com.google.firebase.database.DataSnapshot
@@ -85,6 +84,17 @@ class ModeloCalificar : ViewModel() {
             if (!lista.contains(entrenadorId)) {
                 lista.add(entrenadorId)
                 ref.setValue(lista)
+            }
+        }
+        val refEntrenador = database.getReference("entrenadores/$entrenadorId/deportistas")
+        refEntrenador.get().addOnSuccessListener { snapshot ->
+            val lista = mutableListOf<String>()
+            for (child in snapshot.children) {
+                child.getValue<String>()?.let { lista.add(it) }
+            }
+            if (!lista.contains(uid)) {
+                lista.add(uid)
+                refEntrenador.setValue(lista)
             }
         }
     }

@@ -1,5 +1,9 @@
 package com.example.atlas.elements
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,10 +57,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.atlas.auth
 import com.example.atlas.navegation.AppScreens
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import kotlin.random.Random
 
 @Composable
@@ -220,7 +227,20 @@ fun DefaultTopAppBarHome (nombre : String , controller: NavController){
     )
 }
 
-
+fun bitmapDescriptorFromVector(context : Context, vectorResId : Int) :
+        BitmapDescriptor {
+    val vectorDrawable : Drawable =
+        ContextCompat.getDrawable(context, vectorResId)!!
+    vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(),
+        vectorDrawable.getIntrinsicHeight())
+    val bitmap =
+        Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+            vectorDrawable.getIntrinsicHeight(),
+            Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    vectorDrawable.draw(canvas)
+    return BitmapDescriptorFactory.fromBitmap(bitmap)
+}
 
 
 

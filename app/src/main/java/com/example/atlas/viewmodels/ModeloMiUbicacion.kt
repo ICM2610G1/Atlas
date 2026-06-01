@@ -6,6 +6,7 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.atlas.auth
 import com.example.atlas.database
 import com.example.atlas.geocoder
 import com.example.atlas.modelos.ElevationPoint
@@ -210,6 +211,21 @@ class ModeloMiUbicacion : ViewModel() {
             database.getReference("Sesiones/$sesionId/idAerobico").setValue(nuevoIdTrote)
 
 
+        }
+    }
+    fun compartirUbicacion(lat: Double, long: Double) {
+        val uid = auth.currentUser?.uid
+        if (uid!=null) {
+            val ref = database.getReference("ubicacionUsuario/$uid")
+            ref.child("disponible").setValue(true)
+            ref.child("lat").setValue(lat)
+            ref.child("long").setValue(long)
+        }
+    }
+    fun descompartirUbicacion() {
+        val uid = auth.currentUser?.uid
+        if(uid!=null) {
+            database.getReference("ubicacionUsuario/$uid/disponible").setValue(false)
         }
     }
 

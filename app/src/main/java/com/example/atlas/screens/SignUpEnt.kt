@@ -287,7 +287,7 @@ fun SignUpEnt(controller: NavController , model : EntRegisterViewModel = viewMod
                                                                 state.telefono,
                                                                 state.correo,
                                                                 state.experiencia,
-                                                                state.especialidad
+                                                                state.especialidad,
                                                             )
                                                             dbRef.setValue(usuario)
                                                             val dbRef2 =

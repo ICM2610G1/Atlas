@@ -167,6 +167,7 @@ fun DetallesTrote(controller: NavController, idSesion: String?, model: DetallesT
 
             Button(
                 onClick = {
+                    model.datosenDB()
                     controller.navigate(route = AppScreens.Mimapa.name + "/${state.lugarFinal}/${state.selectedActivity}") },
                 enabled = state.selectedActivity != null && state.lugarFinal.isNotBlank(),
                 modifier = Modifier.fillMaxWidth().height(52.dp).padding(bottom = 4.dp),

@@ -141,8 +141,9 @@ fun Navigation(){
             val idSesion = backStackEntry.arguments?.getString("idSesion")
             DetallesTrote(controller = navController, idSesion = idSesion)
         }
-        composable (route= AppScreens.Ubicacion.name){
-            Ubicacion(navController)
+        composable (route= AppScreens.Ubicacion.name+"/{idDep}"){backStackEntry->
+            val idDeportista= backStackEntry.arguments?.getString("idDep")?:""
+            Ubicacion(navController,idDeportista )
         }
         composable (route= AppScreens.Historial.name){
             Historial(navController)

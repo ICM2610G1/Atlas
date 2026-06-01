@@ -5,68 +5,73 @@ import android.location.Geocoder
 import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.atlas.auth
+import com.example.atlas.database
 import com.example.atlas.modelos.EstadoDeportista
-import com.example.atlas.modelos.EstadoTrote
+import com.example.atlas.objetosDB.Deportista
+import com.example.atlas.objetosDB.UsuariosGen
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.getValue
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import java.util.Locale
 
-class ModeloTrote : ViewModel() {
+class ModeloTrote : ViewModel(){
+    val dbReference = database.getReference("entrenadores/${auth.currentUser?.uid}/deportistas")
+    val _deportistas = MutableStateFlow(listOf<ubicacionUsuario>())
+    val deportistas: StateFlow<List<ubicacionUsuario>> = _deportistas.asStateFlow()
 
-    private val _estado = MutableStateFlow(EstadoTrote())
-    val estado: StateFlow<EstadoTrote> = _estado.asStateFlow()
-
-    fun cargarDeportistas() {
-        _estado.update {
-            it.copy(
-                deportistas = listOf(
-                    EstadoDeportista(nombre = "Andres Carvajal"),
-                    EstadoDeportista(nombre = "Adriana Salazar"),
-                    EstadoDeportista(nombre = "Pedro Gonzalez"),
-                    EstadoDeportista(nombre = "Fernando Torres")
-                )
-            )
-        }
-    }
-
-    fun actualizarUbicacion(indice: Int, lat: Double, lng: Double) {
-        val lista = _estado.value.deportistas.toMutableList()
-        if (indice < lista.size) {
-            lista[indice] = lista[indice].copy(
-                latitud = lat,
-                longitud = lng,
-                enLinea = true
-            )
-            _estado.update { it.copy(deportistas = lista) }
-            Log.i("ModeloTrote", "Deportista $indice: lat=$lat lng=$lng")
-        }
-    }
-
-    fun actualizarDireccion(indice: Int, direccion: String) {
-        val lista = _estado.value.deportistas.toMutableList()
-        if (indice < lista.size) {
-            lista[indice] = lista[indice].copy(direccion = direccion)
-            _estado.update { it.copy(deportistas = lista) }
-        }
-    }
-
-    fun resolverDireccion(context: Context, indice: Int, lat: Double, lng: Double) {
-        val geocoder = Geocoder(context, Locale.getDefault())
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            geocoder.getFromLocation(lat, lng, 1, object : Geocoder.GeocodeListener {
-                override fun onGeocode(addresses: MutableList<android.location.Address>) {
-                    if (addresses.isNotEmpty()) {
-                        actualizarDireccion(indice, addresses[0].getAddressLine(0))
-                    }
+    var vel: ValueEventListener =
+        dbReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val ids = mutableListOf<String>()
+                for (child in snapshot.children) {
+                    child.getValue(String::class.java)?.let { ids.add(it) }
                 }
-            })
-        } else {
-            val addresses = geocoder.getFromLocation(lat, lng, 1)
-            if (!addresses.isNullOrEmpty()) {
-                actualizarDireccion(indice, addresses[0].getAddressLine(0))
+
+                if (ids.isEmpty()) {
+                    _deportistas.value = emptyList()
+                    return
+                }
+                val usuariosRef = database.getReference("ubicacionUsuario")
+                usuariosRef.addValueEventListener(object : ValueEventListener {
+                    override fun onDataChange(snapUsuarios: DataSnapshot) {
+                        val updatedList = mutableListOf<ubicacionUsuario>()
+                        for (id in ids) {
+                            val usuario = snapUsuarios.child(id).getValue(ubicacionUsuario::class.java)
+                            usuario?.let {
+                                if (it.disponible) {
+                                    updatedList.add(it)
+                                }
+                            }
+                        }
+                        _deportistas.value = updatedList
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        _deportistas.value = emptyList()
+                    }
+                })
             }
-        }
-    }
+
+            override fun onCancelled(error: DatabaseError) {
+                _deportistas.value = emptyList()
+            }
+        })
 }
+
+data class ubicacionUsuario(
+    val id: String = "",
+    val nombre: String = "",
+    val imagen: String = "",
+    val disponible: Boolean = false,
+    val lat: Double = 0.0,
+    val long: Double = 0.0,
+    val tipoActividad: String="",
+    val lugarFinal: String=""
+
+)

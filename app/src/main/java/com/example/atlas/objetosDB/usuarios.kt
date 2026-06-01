@@ -17,7 +17,8 @@ data class Deportista(
     val peso: Double=0.0,
     val altura: Double=0.0,
     val observacionesMedicas: String="",
-    val entrenadores : List<String> =emptyList<String>()
+    val entrenadores : List<String> =emptyList<String>(),
+    val disponible: Boolean = false
 )
 
 data class Entrenador (
@@ -29,7 +30,8 @@ data class Entrenador (
     val correo: String ="",
     val anosProfesionales: Double =0.0,
     val especialidad: String ="",
-    val calificacionPromedio: Double =0.0
+    val calificacionPromedio: Double =0.0,
+    val entrenadores : List<String> =emptyList<String>()
 )
 
 data class Valoracion(

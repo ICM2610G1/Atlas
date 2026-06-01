@@ -197,6 +197,7 @@ fun MiUbicacion(
             }
             modelo.actualizarPosicion(contexto, location.latitude, location.longitude)
             modelo.resolverDireccion(contexto, location.latitude, location.longitude)
+            modelo.compartirUbicacion(location.latitude,location.longitude)
         }
     }
 
@@ -230,7 +231,9 @@ fun MiUbicacion(
                 locationRequest, locationCallback, Looper.getMainLooper()
             )
         }
-        onDispose { locationClient.removeLocationUpdates(locationCallback) }
+        onDispose { locationClient.removeLocationUpdates(locationCallback)
+            modelo.descompartirUbicacion()
+        }
     }
 
     LaunchedEffect(final) {
@@ -386,6 +389,7 @@ fun MiUbicacion(
                         DefaulButton("Finalizar actividad", 220, 40) {
                             modelo.actualizarTiempo(tiempoSegundos)
                             modelo.finalizarYGuardarSesion(idSesionGrande, tiempoSegundos, final, actividad)
+
                             controller.navigate(route = AppScreens.CrearNuevaSesion.name)
                         }
                     }

@@ -2,11 +2,6 @@ package com.example.atlas.modelos
 
 import com.google.android.gms.maps.model.LatLng
 
-data class EstadoCalificar(
-    val calificacion: Int = 0,
-    val comentario: String = "",
-    val entrenador: String = ""
-)
 
 data class EstadoVisualizarDeportista(
     val nombre: String = "Andres Carvajal",
@@ -17,10 +12,6 @@ data class EstadoVisualizarDeportista(
     val objetivo: String = "Aumentar masa\nmuscular en un\n50%"
 )
 
-data class DeportistaTrote(
-    val nombre: String,
-    val ubicacion: String
-)
 data class EstadoDeportista(
     val nombre: String = "",
     val latitud: Double = 0.0,
@@ -29,25 +20,13 @@ data class EstadoDeportista(
     val enLinea: Boolean = false
 )
 
-data class EstadoTrote(
-    val deportistas: List<EstadoDeportista> = emptyList()
-)
 
 //PARA GUARDAR DATOS MOCKEABLES
 
-data class EstadoUbicacion(
-    val nombreDeportista: String = "Deportista",
-    val latitud: Double = 4.627293,
-    val longitud: Double = -74.063228,
-    val direccion: String = "Obteniendo ubicación...",
-    val distanciaKm: Double = 0.0,
-    val tiempoMin: Int = 0
 
-)
-//Esta en particular sirve para almacenar la altura
 data class ElevationPoint(
-    val distancia: Double,
-    val altitud: Float
+    val distancia: Double=0.0,
+    val altitud: Float=0.0f
 )
 
 //PARA EL MAPA MONOUSUARIO
