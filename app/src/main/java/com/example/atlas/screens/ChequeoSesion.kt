@@ -1,5 +1,6 @@
 package com.example.atlas.screens
 
+import EjercicioViewModel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,65 +51,50 @@ import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
-import com.example.atlas.viewmodels.EjercicioViewModel
+import kotlinx.coroutines.flow.compose
+
 
 @Composable
-fun ChequeoSesion(controller: NavController, viewModel: EjercicioViewModel = viewModel()) {
-    val estado by viewModel.estado.collectAsState()
-    Scaffold(
-        topBar = { DefaultTopAppBar(nombre = "Estado de sesion") },
-        bottomBar = { DefaultBottomBarDep(colorId = R.color.white, controller = controller) }
-    ) { paddingValues ->
+fun ChequeoSesion(controller: NavController, viewModel: EjercicioViewModel) {
+    // Escuchamos la lista en tiempo real directamente desde tu StateFlow
+    val ejercicios by viewModel.ejerciciosSesion.collectAsState()
 
+    Scaffold(
+        topBar = { DefaultTopAppBar("Chequeo de Sesión") },
+        bottomBar = { DefaultBottomBarDep(R.color.rojoGranada, controller) }
+    ) { innerPadding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 24.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Control de Rutina",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorResource(R.color.rojoGranada),
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
 
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            // Lista de los ejercicios agregados a esta sesión
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-
-                Image(
-                    painter = painterResource(id = R.drawable.puma),
-                    contentDescription = "Mascota Puma",
-                    modifier = Modifier.size(150.dp)
-                )
-
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.weight(1f)
-                ) {
-
-                    Icon(
-                        painter = painterResource(R.drawable.burbuja),
-                        contentDescription = "DialogoPuma",
-                        tint = colorResource(R.color.rojoGranada)
-                    )
-
-                    Text(
-                        text = "¡Así se hace! Marca\ncada ejercicio\ncompletado para seguir\nel progreso.",
-                        color = colorResource(R.color.rojoGranada),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            LazyColumn {
-                items(estado.lista) { ejercicio ->
+                items(ejercicios, key = { it.firebaseKey }) { item ->
+                    val ej = item.ejercicio
 
                     Card(
-                        modifier = Modifier.padding(8.dp),
-                        shape = RoundedCornerShape(16.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (ej.completado) Color(0xFFE8F5E9) else MaterialTheme.colorScheme.surfaceVariant
+                        )
                     ) {
-
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -115,51 +102,39 @@ fun ChequeoSesion(controller: NavController, viewModel: EjercicioViewModel = vie
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-
-                            Column {
-                                Text(ejercicio.nombre, fontWeight = FontWeight.Bold)
-
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = ej.nombre,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Row {
-                                    Text("Series: ${ejercicio.series}")
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("Rep: ${ejercicio.rep}")
-                                    Spacer(Modifier.width(8.dp))
-                                    Text("Kg: ${ejercicio.kg}")
+                                    Text("Series: ${ej.series}", fontSize = 14.sp)
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text("Reps: ${ej.repeticiones}", fontSize = 14.sp)
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text("Peso: ${ej.peso} Kg", fontSize = 14.sp)
                                 }
                             }
                             IconButton(
                                 onClick = {
-                                    viewModel.toggleCompletado(ejercicio.id)
+                                    viewModel.toggleCompletado(item.firebaseKey, ej.completado)
                                 }
                             ) {
                                 Icon(
-                                    imageVector = if (ejercicio.completado)
-                                        Icons.Default.Check
-                                    else
-                                        Icons.Default.Info,
-                                    contentDescription = null,
-                                    tint = if (ejercicio.completado)
-                                        Color.Red
-                                    else
-                                        Color.Gray
+                                    imageVector = if (ej.completado) Icons.Default.Check else Icons.Default.Info,
+                                    contentDescription = "Estado",
+                                    tint = if (ej.completado) Color(0xFF2E7D32) else Color.Gray
                                 )
                             }
                         }
                     }
                 }
             }
-
-            DefaulButton(text = "Terminar sesion", ancho = 240, alto = 50) {
+            DefaulButton(text = "Terminar sesión", ancho = 240, alto = 50) {
                 controller.navigate(route = AppScreens.CrearNuevaSesion.name)
             }
-
-        }
         }
     }
-
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewChequeoSesion() {
-    ChequeoSesion(rememberNavController())
 }

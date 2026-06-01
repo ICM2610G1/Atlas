@@ -9,10 +9,7 @@ import com.google.firebase.database.getValue
 
 class ModeloCrearChat : ViewModel() {
 
-    fun crearChat(
-        usuario: UsuariosGen,
-        irAlChat: (String, String) -> Unit
-    ) {
+    fun crearChat(usuario: UsuariosGen, irAlChat: (String, String) -> Unit) {
         val idActual = auth.currentUser?.uid ?: return
         val idOtro = usuario.id
 

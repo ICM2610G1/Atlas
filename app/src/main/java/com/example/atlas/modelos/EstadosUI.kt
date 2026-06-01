@@ -21,27 +21,6 @@ data class DeportistaTrote(
     val nombre: String,
     val ubicacion: String
 )
-
-data class EstadoTroteActivo(
-    val deportistas: List<DeportistaTrote> = listOf(
-        DeportistaTrote("Andres Carvajal", "Parque Nacional"),
-        DeportistaTrote("Adriana Salazar", "Av. Boyacá, Calle 80"),
-        DeportistaTrote("Pedro Gonzalez", "Cra 50, Av. Esperanza"),
-        DeportistaTrote("Fernando Torres", "CC Gran Estación")
-    ),
-    val distancia: Double = 0.0,
-    val pasos: Int = 0,
-    val tiempoSegundos: Int = 0,
-    val trotando: Boolean = false
-)
-
-data class EstadoLogIn(
-    val usuario: String = "",
-    val contrasena: String = "",
-    val autenticado: Boolean = false,
-    val mensajeError: String = ""
-)
-
 data class EstadoDeportista(
     val nombre: String = "",
     val latitud: Double = 0.0,
@@ -97,11 +76,6 @@ data class Authstate(
     val emailError: String = "",
     val passwordError: String = ""
 )
-
-
-
-
-
 //PARA LOS PERFILES
 
 data class EstadoPerfil(
@@ -124,17 +98,7 @@ data class EstadoPerfilEnt(
     val uriImagen: android.net.Uri? = null
 )
 //PARA LAS PANTALLAS ASOCIADAS A EJERCICIOS
-data class Ejercicio(
-    val id: Int,
-    val nombre: String,
-    val series: Int,
-    val rep: Int,
-    val kg: Int,
-    val completado: Boolean
-)
-data class SobreEjercicios(
-    val lista: List<Ejercicio> = emptyList()
-)
+
 data class Progreso(
     val objetivo: String = "",
     val metaCalorica : String = "" ,

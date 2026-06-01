@@ -1,7 +1,7 @@
 package com.example.atlas.navegation
+import EjercicioViewModel
 import Pantallas.PantallaEjercicios
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,6 +11,7 @@ import com.example.atlas.screens.Calificar
 import com.example.atlas.screens.Camara
 import com.example.atlas.screens.CatalogoActividades
 import com.example.atlas.screens.Chats
+import com.example.atlas.screens.ChequeoSesion
 import com.example.atlas.screens.DetalleSesion
 import com.example.atlas.screens.Historial
 import com.example.atlas.screens.Home
@@ -19,7 +20,7 @@ import com.example.atlas.screens.LogIn
 import com.example.atlas.screens.Perfil
 import com.example.atlas.screens.PerfilEnt
 import com.example.atlas.screens.Ubicacion
-import com.example.atlas.screens.ChequeoSesion
+//import com.example.atlas.screens.ChequeoSesion
 import com.example.atlas.screens.CrearNuevaSesion
 import com.example.atlas.screens.DetallesTrote
 import com.example.atlas.screens.ElegirTipo
@@ -34,8 +35,9 @@ import com.example.atlas.screens.SignUpEnt
 import com.example.atlas.screens.TroteActivo
 import com.example.atlas.screens.chatP
 import com.example.atlas.screens.vistaSesionesEntrenador
-import com.example.atlas.viewmodels.EjercicioViewModel
+import com.example.atlas.viewmodels.CrearSesionViewModel
 import com.example.atlas.viewmodels.ModeloMiUbicacion
+import com.example.atlas.viewmodels.ResumenSesionViewModel
 
 enum class AppScreens{
     Appstart,
@@ -76,8 +78,10 @@ enum class AppScreens{
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
+    val ejercicioViewModel: EjercicioViewModel = viewModel()
     val miUbicacionViewModel: ModeloMiUbicacion = viewModel()
-    val EjercicioviewModel: EjercicioViewModel = viewModel()
+    val sesionViewModel: CrearSesionViewModel = viewModel()
+    val resumenViewModel: ResumenSesionViewModel = viewModel()
     NavHost(navController, startDestination = AppScreens.Appstart.name){
         composable (route= AppScreens.Appstart.name){
             AppStart(navController)
@@ -105,21 +109,26 @@ fun Navigation(){
             vistaSesionesEntrenador(navController)
         }
         composable (route= AppScreens.CrearNuevaSesion.name){
-            CrearNuevaSesion(navController)
+            CrearNuevaSesion(navController, sesionViewModel)
         }
-        composable (route= AppScreens.Ejercicios.name+"/{ejercicio}"){
-                backStackEntry ->
+        composable (route= AppScreens.Ejercicios.name+"/{ejercicio}"){ backStackEntry ->
             val ejercicio = backStackEntry.arguments?.getString("ejercicio")
-
-            PantallaEjercicios(controller = navController, ejercicio = ejercicio, viewModel = EjercicioviewModel)
+            PantallaEjercicios(controller = navController, ejercicio = ejercicio, modelEjercicios = ejercicioViewModel, modelSesion = sesionViewModel )
         }
         composable (route= AppScreens.Ejercicios.name){
-
-
-            PantallaEjercicios(controller = navController, viewModel = EjercicioviewModel)
+            PantallaEjercicios(controller = navController, modelEjercicios = ejercicioViewModel, modelSesion = sesionViewModel )
         }
-        composable (route= AppScreens.detallesTrote.name){
-            DetallesTrote(navController)
+
+        composable(route = AppScreens.agregarEjercicio.name) {
+            CatalogoActividades(controller = navController, modelE = ejercicioViewModel)
+        }
+
+        composable (route= AppScreens.ChequeoSesion.name){
+            ChequeoSesion(controller = navController, viewModel = ejercicioViewModel)
+        }
+        composable (route= AppScreens.detallesTrote.name+"/{idSesion}"){backStackEntry ->
+            val idSesion = backStackEntry.arguments?.getString("idSesion")
+            DetallesTrote(controller = navController, idSesion = idSesion)
         }
         composable (route= AppScreens.Ubicacion.name){
             Ubicacion(navController)
@@ -145,35 +154,25 @@ fun Navigation(){
         composable (route= AppScreens.Elegirtipo.name){
             ElegirTipo(navController)
         }
-
-        composable (route= AppScreens.agregarEjercicio.name){
-            CatalogoActividades(navController)
-        }
         composable (route= AppScreens.LogIn.name){
             LogIn(navController)
         }
         composable (route= AppScreens.DetalleSesion.name){
             DetalleSesion(navController)
         }
-        composable (route= AppScreens.ChequeoSesion.name){
-
-            ChequeoSesion(navController,EjercicioviewModel)
-        }
         composable (route= AppScreens.RecoverPassword.name){
             RecoverPassword(navController)
         }
-        composable (route= AppScreens.Mimapa.name + "/{fin}/{actividad}"){backStackEntry->
+        composable(route = AppScreens.Mimapa.name + "/{fin}/{actividad}") { backStackEntry ->
             val lugarFinal = backStackEntry.arguments?.getString("fin") ?: ""
-            val actividad = backStackEntry.arguments?.getString("actividad") ?: ""
-
-            MiUbicacion(navController, lugarFinal, actividad, miUbicacionViewModel)
+            val actividad  = backStackEntry.arguments?.getString("actividad") ?: ""
+            MiUbicacion(controller = navController, final= lugarFinal, actividad= actividad, modelo= miUbicacionViewModel, modeloSesion = sesionViewModel)
         }
         composable(route= AppScreens.ResumenTrote.name){
-
             ResumenTrote(navController, miUbicacionViewModel)
         }
-        composable(route = AppScreens.ResumenSesion.name){
-            ResumenSesion(navController, EjercicioviewModel, miUbicacionViewModel)
+        composable(route = AppScreens.ResumenSesion.name) {
+            ResumenSesion(controller = navController, model = resumenViewModel, modelSesion = sesionViewModel)
         }
         composable (route= AppScreens.MessageEmail.name){
             MessageEmail(navController)

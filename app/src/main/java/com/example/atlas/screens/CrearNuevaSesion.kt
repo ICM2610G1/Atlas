@@ -27,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.atlas.R
@@ -34,13 +36,17 @@ import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
+import com.example.atlas.viewmodels.CrearSesionViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CrearNuevaSesion(controller: NavController) {
-    var troteSeleccionado by remember { mutableStateOf(false) }
-    var gymSeleccionado by remember { mutableStateOf(false) }
+fun CrearNuevaSesion(controller: NavController, model: CrearSesionViewModel= viewModel()) {
+    val state by model.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        model.crearSesion()
+    }
 
     Scaffold(
         containerColor = colorResource(R.color.pink),
@@ -99,8 +105,8 @@ fun CrearNuevaSesion(controller: NavController) {
             ) {
                 ElevatedCard(
                     modifier = Modifier.weight(1f).fillMaxHeight()
-                        .clickable { troteSeleccionado = !troteSeleccionado
-                                   controller.navigate(route= AppScreens.detallesTrote.name)},
+                        .clickable { model.updateTrote( !state.troteSeleccionado)
+                                   controller.navigate(route= AppScreens.detallesTrote.name+"/${state.idSesionActiva}")},
                     colors = CardDefaults.elevatedCardColors(
                         containerColor = Color.White
                     ),
@@ -118,7 +124,7 @@ fun CrearNuevaSesion(controller: NavController) {
                             textAlign = TextAlign.Center
                         )
                         RadioButton(
-                            selected = troteSeleccionado,
+                            selected = state.troteSeleccionado,
                             onClick = null,
                             colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.rojoGranada)),
                             modifier= Modifier.padding(10.dp)
@@ -126,7 +132,7 @@ fun CrearNuevaSesion(controller: NavController) {
                     }
                 }
                 ElevatedCard(
-                    onClick = { gymSeleccionado = !gymSeleccionado
+                    onClick = { model.updateGym(!state.gymSeleccionado)
                               controller.navigate(route= AppScreens.Ejercicios.name)},
                     modifier = Modifier.weight(1f).fillMaxHeight(),
                     colors = CardDefaults.elevatedCardColors(
@@ -146,7 +152,7 @@ fun CrearNuevaSesion(controller: NavController) {
                             textAlign = TextAlign.Center
                         )
                         RadioButton(
-                            selected = gymSeleccionado,
+                            selected = state.gymSeleccionado,
                             onClick = null,
                             colors = RadioButtonDefaults.colors(selectedColor = colorResource(R.color.rojoGranada)),
                             modifier= Modifier.padding(10.dp)
@@ -160,6 +166,7 @@ fun CrearNuevaSesion(controller: NavController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 DefaulButton("Terminar sesión", 220, 40) {
+                    model.terminarSesion()
                     Log.i("TAGInicio", "Click Iniciar ")
                     controller.navigate(route = AppScreens.ResumenTrote.name)
                 }

@@ -1,12 +1,9 @@
 package com.example.atlas.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.*
@@ -22,11 +19,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.atlas.R
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
+import com.example.atlas.viewmodels.DetallesTroteViewModel
 
 data class Actividad(
     val nombre: String, //MOCKEABLE, PARA RESTRINGIR ANTES DE LA BASE DE DATOS
@@ -34,18 +33,14 @@ data class Actividad(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetallesTrote(controller: NavController) {
+fun DetallesTrote(controller: NavController, idSesion: String?, model: DetallesTroteViewModel = viewModel()) {
 
-
+    val state by model.uiState.collectAsState()
     val activityOptions = listOf(
         Actividad("Trote"),
         Actividad("Ciclismo"),
         Actividad("Senderismo")
     )
-
-    var selectedActivity by remember { mutableStateOf<String?>(null) }
-    var lugarInicio by remember { mutableStateOf("") }
-    var lugarFinal by remember { mutableStateOf("") }
 
     Scaffold(
         containerColor = colorResource(R.color.pink),
@@ -92,9 +87,9 @@ fun DetallesTrote(controller: NavController) {
             )
 
             activityOptions.forEach { actividad ->
-                val isSelected = selectedActivity == actividad.nombre
+                val isSelected = state.selectedActivity == actividad.nombre
                 ElevatedCard(
-                    onClick = { selectedActivity = actividad.nombre },
+                    onClick = { model.actActivity(actividad.nombre) },
                     modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
                     shape = RoundedCornerShape(14.dp),
                 ) {
@@ -128,7 +123,7 @@ fun DetallesTrote(controller: NavController) {
                         }
                         RadioButton(
                             selected = isSelected,
-                            onClick = { selectedActivity = actividad.nombre },
+                            onClick = { model.actActivity( actividad.nombre) },
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = colorResource(R.color.rojoGranada),
                                 unselectedColor = colorResource(R.color.rojoGranada)
@@ -146,8 +141,8 @@ fun DetallesTrote(controller: NavController) {
                 modifier = Modifier.padding(bottom = 10.dp)
             )
             OutlinedTextField(
-                value = lugarFinal,
-                onValueChange = { lugarFinal = it },
+                value = state.lugarFinal,
+                onValueChange = { model.actLugarFinal(it) },
                 label = { Text("Lugar de destino") },
                 leadingIcon = {
                     Icon(
@@ -171,8 +166,9 @@ fun DetallesTrote(controller: NavController) {
             )
 
             Button(
-                onClick = { controller.navigate(route = AppScreens.Mimapa.name + "/${lugarFinal}/${selectedActivity}") },
-                enabled = selectedActivity != null && lugarFinal.isNotBlank(),
+                onClick = {
+                    controller.navigate(route = AppScreens.Mimapa.name + "/${state.lugarFinal}/${state.selectedActivity}") },
+                enabled = state.selectedActivity != null && state.lugarFinal.isNotBlank(),
                 modifier = Modifier.fillMaxWidth().height(52.dp).padding(bottom = 4.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(

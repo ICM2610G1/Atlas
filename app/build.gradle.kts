@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.maps.compose)
     implementation("com.google.android.gms:play-services-maps:20.0.0")
     implementation ("com.github.tehras:charts:0.2.4-alpha")
+    implementation("com.android.volley:volley:1.2.1")
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.auth)
     implementation(libs.androidx.credentials)

@@ -1,10 +1,6 @@
 package com.example.atlas.screens
 
-import android.util.Log
-import android.widget.Toast
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,23 +11,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,17 +34,21 @@ import androidx.navigation.NavController
 import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
-import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
-import com.example.atlas.viewmodels.EjercicioViewModel
-import com.example.atlas.viewmodels.ModeloMiUbicacion
+import com.example.atlas.viewmodels.CrearSesionViewModel
+import com.example.atlas.viewmodels.ResumenSesionViewModel
 
 @Composable
-fun ResumenSesion(controller: NavController, model1: EjercicioViewModel= viewModel(), model2: ModeloMiUbicacion=viewModel()) {
+fun ResumenSesion(controller: NavController, model: ResumenSesionViewModel = viewModel(), modelSesion: CrearSesionViewModel = viewModel()
+) {
     val rojoGranada = colorResource(R.color.rojoGranada)
-    val stateEj=model1.estado.collectAsState()
-    val stateUbi=model2.estado.collectAsState()
+    val state by model.state.collectAsState()
+    val sesionState by modelSesion.uiState.collectAsState()
+
+    LaunchedEffect(sesionState.idSesionActiva) {
+        model.cargarResumen(sesionState.idSesionActiva)
+    }
 
     Scaffold(
         topBar = { DefaultTopAppBar("Resumen sesión") },
@@ -98,7 +93,7 @@ fun ResumenSesion(controller: NavController, model1: EjercicioViewModel= viewMod
 
             Row(
                 modifier = Modifier
-                    .height(280.dp)
+                    .wrapContentHeight()
                     .padding(horizontal = 10.dp)
             ) {
                 ElevatedCard(
@@ -120,21 +115,12 @@ fun ResumenSesion(controller: NavController, model1: EjercicioViewModel= viewMod
                             fontWeight = FontWeight.Black,
                             color = rojoGranada
                         )
-                        val tiempoHoras = stateUbi.value.tiempoSegundos / 3600f
-                        val temperatura = stateUbi.value.temperaturaActual
 
-                        val factorDeTemperatura = when {
-                            temperatura < 10f -> 1.15f
-                            temperatura < 18f -> 1.05f
-                            temperatura in 18f..24f -> 1.0f
-                            temperatura < 32f -> 1.08f
-                            else -> 1.12f
-                        }
-
-                        val calorias = (8f * 70f * tiempoHoras * factorDeTemperatura).toInt()
-
-                        DatoResumenSesion("# Ejercicios", "${stateEj.value.lista.size}")
-                        DatoResumenSesion("Calorías", "${calorias} Kcal")
+                        DatoResumenSesion("# Ejercicios", "${state.numEjercicios}")
+                        DatoResumenSesion("Actividad", state.tipoActividad)
+                        DatoResumenSesion("Distancia", "${state.distanciaKm} km")
+                        DatoResumenSesion("Tiempo", "${state.tiempoSegundos} s")
+                        DatoResumenSesion("Calorías", "${state.caloriasTotal} Kcal")
                     }
                 }
             }
@@ -154,8 +140,10 @@ fun ResumenSesion(controller: NavController, model1: EjercicioViewModel= viewMod
 
 @Composable
 fun DatoResumenSesion(label: String, value: String) {
-    Column(modifier= Modifier.padding(5.dp),
-        horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.padding(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(label, fontSize = 23.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         Text(value, fontSize = 25.sp, fontWeight = FontWeight.Bold, color = colorResource(R.color.rojoGranada))
     }

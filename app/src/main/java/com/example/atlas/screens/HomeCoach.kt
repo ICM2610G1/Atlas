@@ -46,13 +46,11 @@ fun HomeCoach(controller : NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize().padding(paddingValues)
         ) {
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
 
                 ) {
-
                 icono_circulo(R.drawable.mensajero, "Chats")
                 DefaulButton("Chats", 220, 40) {
                     Log.i("TAGChats", "Click Chat")

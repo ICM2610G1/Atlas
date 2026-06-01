@@ -1,5 +1,6 @@
 package Pantallas
 
+import EjercicioViewModel
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,10 +34,9 @@ import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
 import com.example.atlas.elements.DefaultTopAppBar
-import com.example.atlas.modelos.Ejercicio
-import com.example.atlas.modelos.SobreEjercicios
 import com.example.atlas.navegation.AppScreens
-import com.example.atlas.viewmodels.EjercicioViewModel
+import com.example.atlas.screens.TipoCuenta
+import com.example.atlas.viewmodels.CrearSesionViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,13 +47,14 @@ import kotlin.collections.emptyList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaEjercicios(controller: NavController, ejercicio: String?=null, viewModel: EjercicioViewModel = viewModel() ){
+fun PantallaEjercicios(controller: NavController, ejercicio: String? = null, modelEjercicios: EjercicioViewModel = viewModel(), modelSesion: CrearSesionViewModel = viewModel()
+) {
+    val sesionState by modelSesion.uiState.collectAsState()
+    val ejercicios by modelEjercicios.ejerciciosSesion.collectAsState()
 
-    val estado by viewModel.estado.collectAsState()
-
-    LaunchedEffect(ejercicio) {
-        if (ejercicio != null) {
-            viewModel.agregarEjercicio(ejercicio)
+    LaunchedEffect(sesionState.idSesionActiva) {
+        if (sesionState.idSesionActiva.isNotEmpty()) {
+            modelEjercicios.iniciarSesionFuerza(sesionState.idSesionActiva)
         }
     }
 
@@ -67,9 +68,7 @@ fun PantallaEjercicios(controller: NavController, ejercicio: String?=null, viewM
                 modifier = Modifier.padding(16.dp).weight(8f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-
-                items(estado.lista) { ejercicio ->
-
+                items(ejercicios, key = { it.firebaseKey }) { ej ->
                     Card(
                         shape = RoundedCornerShape(16.dp),
                         colors = CardDefaults.cardColors(
@@ -77,20 +76,17 @@ fun PantallaEjercicios(controller: NavController, ejercicio: String?=null, viewM
                         ),
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                     ) {
-
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-
                             Column(
                                 modifier = Modifier.weight(1f),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-
                                 Text(
-                                    text = ejercicio.nombre,
+                                    text = ej.ejercicio.nombre,
                                     color = colorResource(R.color.rojoGranada),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp
@@ -100,20 +96,19 @@ fun PantallaEjercicios(controller: NavController, ejercicio: String?=null, viewM
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text("Series", fontWeight = FontWeight.Bold)
-                                        Text("${ejercicio.series}")
+                                        Text("${ej.ejercicio.series}")
                                     }
 
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text("Rep", fontWeight = FontWeight.Bold)
-                                        Text("${ejercicio.rep}")
+                                        Text("${ej.ejercicio.repeticiones}")
                                     }
 
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Text("Kg", fontWeight = FontWeight.Bold)
-                                        Text("${ejercicio.kg}")
+                                        Text("${ej.ejercicio.peso}")
                                     }
                                 }
                             }
@@ -121,18 +116,16 @@ fun PantallaEjercicios(controller: NavController, ejercicio: String?=null, viewM
                     }
                 }
             }
-            Column(modifier=Modifier.weight(2f)) {
+            Column(modifier = Modifier.weight(2f)) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding (vertical = 50.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 50.dp),
                     horizontalArrangement = Arrangement.Center
-
                 ) {
                     DefaulButton("Agregar ejercicios", 220, 40) {
                         controller.navigate(route = AppScreens.agregarEjercicio.name)
                     }
                     DefaulButton("Iniciar actividad", 220, 40) {
                         controller.navigate(route = AppScreens.ChequeoSesion.name)
-
                     }
                 }
             }

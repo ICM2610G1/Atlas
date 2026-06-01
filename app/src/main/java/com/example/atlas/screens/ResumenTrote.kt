@@ -91,7 +91,6 @@ fun ResumenTrote(controller: NavController, model: ModeloMiUbicacion= viewModel(
                 .fillMaxSize()
                 .padding(bottom = 20.dp)
         ) {
-            // --- Bloque del Puma y Diálogo ---
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.Center,
@@ -122,7 +121,6 @@ fun ResumenTrote(controller: NavController, model: ModeloMiUbicacion= viewModel(
                     )
                 }
             }
-
             Row(
                 modifier = Modifier
                     .height(200.dp)

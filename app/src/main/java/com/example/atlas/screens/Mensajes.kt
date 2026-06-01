@@ -45,8 +45,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun chatP(
-    idChat: String,
+fun chatP(idChat: String,
     contacto: String,
     controller: NavController,
     modeloMensajesChat: ModeloMensajesChat = viewModel(),

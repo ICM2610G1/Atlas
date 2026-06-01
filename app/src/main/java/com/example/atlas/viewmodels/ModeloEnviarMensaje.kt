@@ -69,9 +69,7 @@ class ModeloEnviarMensaje : ViewModel() {
         usuarioActual: UsuariosGen
     ) {
         val idActual = auth.currentUser?.uid
-
         if (idActual != null) {
-
             database.getReference("chatsPorUsuario/")
                 .child(idActual)
                 .child(idChat)

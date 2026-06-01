@@ -6,9 +6,11 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.atlas.database
 import com.example.atlas.geocoder
 import com.example.atlas.modelos.ElevationPoint
 import com.example.atlas.modelos.EstadoMiUbicacion
+import com.example.atlas.objetosDB.sesionAerobica
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,10 +29,12 @@ class ModeloMiUbicacion : ViewModel() {
     }
 
     fun actualizarTemperatura(temp: Float, promedio: Float) {
-        _estado.update { it.copy(
-            temperaturaActual = temp,
-            temperaturaPromedio = promedio
-        )}
+        _estado.update {
+            it.copy(
+                temperaturaActual = temp,
+                temperaturaPromedio = promedio
+            )
+        }
     }
 
     fun agregarPuntoElevacion(distancia: Double, altitud: Float) {
@@ -47,7 +51,8 @@ class ModeloMiUbicacion : ViewModel() {
     }
 
     fun actualizarPosicion(context: Context, lat: Double, lng: Double) {
-        val distancia = calcularDistancia(_estado.value.latInicio, _estado.value.lngInicio, lat, lng)
+        val distancia =
+            calcularDistancia(_estado.value.latInicio, _estado.value.lngInicio, lat, lng)
         _estado.update {
             it.copy(latitud = lat, longitud = lng, distanciaRecorrida = distancia)
         }
@@ -60,6 +65,7 @@ class ModeloMiUbicacion : ViewModel() {
             ejecutarCalculoRuta(context)
         }
     }
+
     private fun ejecutarCalculoRuta(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val origen = _estado.value.posicionOrigen
@@ -67,7 +73,8 @@ class ModeloMiUbicacion : ViewModel() {
 
             if (origen != null && destino != null) {
                 try {
-                    val roadManager = org.osmdroid.bonuspack.routing.OSRMRoadManager(context, "ANDROID")
+                    val roadManager =
+                        org.osmdroid.bonuspack.routing.OSRMRoadManager(context, "ANDROID")
                     val puntos = arrayListOf(
                         org.osmdroid.util.GeoPoint(origen.latitude, origen.longitude),
                         org.osmdroid.util.GeoPoint(destino.latitude, destino.longitude)
@@ -82,6 +89,7 @@ class ModeloMiUbicacion : ViewModel() {
             }
         }
     }
+
     fun resolverDireccion(context: Context, lat: Double, lng: Double) {
         val geocoderLocal = Geocoder(context, Locale.getDefault())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -99,6 +107,7 @@ class ModeloMiUbicacion : ViewModel() {
             }
         }
     }
+
     fun establecerOrigen(lat: Double, lng: Double) {
         _estado.update { it.copy(posicionOrigen = LatLng(lat, lng)) }
     }
@@ -132,18 +141,20 @@ class ModeloMiUbicacion : ViewModel() {
         val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
         return Math.round(6371 * c * 100.0) / 100.0
     }
+
     fun actualizarTiempo(segundos: Int) {
         _estado.update { it.copy(tiempoSegundos = segundos) }
     }
 
-        fun calcularRuta(context: Context) {
+    fun calcularRuta(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
             val origen = _estado.value.posicionOrigen
             val destino = _estado.value.posicionDestino
 
             if (origen != null && destino != null) {
                 val roadManager = org.osmdroid.bonuspack.routing.OSRMRoadManager(context, "ANDROID")
-                val puntos = arrayListOf(org.osmdroid.util.GeoPoint(origen.latitude, origen.longitude),
+                val puntos = arrayListOf(
+                    org.osmdroid.util.GeoPoint(origen.latitude, origen.longitude),
                     org.osmdroid.util.GeoPoint(destino.latitude, destino.longitude)
                 )
                 val road = roadManager.getRoad(puntos)
@@ -163,4 +174,50 @@ class ModeloMiUbicacion : ViewModel() {
             )
         }
     }
+
+    fun finalizarYGuardarSesion(
+        sesionId: String,
+        tiempoFinalSegundos: Int,
+        lugarFinal: String,
+        tipoActividad: String
+    ) {
+        if (sesionId.isEmpty()) {
+            Log.w("ModeloMiUbicacion", "sesionId vacío, no se puede guardar")
+            return
+        }
+
+        Log.i("ModeloMiUbicacion", "Guardando sesión aeróbica para sesión: $sesionId")
+
+        val dbref = database.getReference("SesionesTrote")
+        val nuevoIdTrote = dbref.push().key
+        if (nuevoIdTrote != null) {
+            val nuevaSesion = sesionAerobica(
+                sesionId = sesionId,
+                lugarInicio = _estado.value.direccionActual,
+                lugarFinal = lugarFinal,
+                temperaturaPromedio = estado.value.temperaturaPromedio,
+                tipoActividad = tipoActividad,
+                valeocidadPromedio = calcularVelocidadPromedio(
+                    _estado.value.distanciaRecorrida,
+                    tiempoFinalSegundos
+                ),
+                puntosElevacion = estado.value.puntosElevacion,
+                duracion = tiempoFinalSegundos,
+                distancia = estado.value.distanciaRecorrida
+            )
+
+            dbref.child(nuevoIdTrote).setValue(nuevaSesion)
+            database.getReference("Sesiones/$sesionId/idAerobico").setValue(nuevoIdTrote)
+
+
+        }
+    }
+
+    private fun calcularVelocidadPromedio(distanciaKm: Double, tiempoSegundos: Int): Double {
+        if (tiempoSegundos <= 0) return 0.0
+        val horas = tiempoSegundos / 3600.0
+        val velocidad = distanciaKm / horas
+        return Math.round(velocidad * 100.0) / 100.0
+    }
 }
+
