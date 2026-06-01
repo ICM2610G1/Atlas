@@ -18,8 +18,10 @@ mapsCompose = "8.3.0"
 firebaseDatabase = "22.0.1"
 firebaseStorageKtx = "22.0.1"
 firebaseStorage = "22.0.1"
+firebaseMessaging = "25.0.1"
 
 [libraries]
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

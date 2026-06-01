@@ -1,5 +1,6 @@
 package com.example.atlas.screens
 
+import com.example.atlas.notificaciones.TokenFCM
 import android.content.Context
 import android.content.ContextWrapper
 import android.util.Log
@@ -173,6 +174,7 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel(), mod
                         auth.signInWithEmailAndPassword(state.email, state.password)
                             .addOnCompleteListener {
                                 if (it.isSuccessful) {
+                                    TokenFCM.guardarTokenActual()
                                     val user = auth.currentUser?.uid
                                     user?.let { uid ->
                                         model1.obtenerTipoCuenta(
@@ -216,6 +218,7 @@ fun LogIn(controller: NavController, model: UserAuthViewModel = viewModel(), mod
                             actividad?.Authenticate { exito ->
                                 if (exito) {
                                     if (auth.currentUser != null) {
+                                        TokenFCM.guardarTokenActual()
                                         controller.navigate(route = AppScreens.Home.name)
                                     } else {
                                         Toast.makeText(context, "Primero inicia sesión con usuario y contraseña", Toast.LENGTH_LONG).show()

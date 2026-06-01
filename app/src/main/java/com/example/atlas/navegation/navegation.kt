@@ -1,4 +1,7 @@
 package com.example.atlas.navegation
+
+import androidx.compose.runtime.LaunchedEffect
+import com.example.atlas.notificaciones.ChatPendienteNotificacion
 import EjercicioViewModel
 import Pantallas.PantallaEjercicios
 import androidx.compose.runtime.Composable
@@ -82,6 +85,16 @@ fun Navigation(){
     val miUbicacionViewModel: ModeloMiUbicacion = viewModel()
     val sesionViewModel: CrearSesionViewModel = viewModel()
     val resumenViewModel: ResumenSesionViewModel = viewModel()
+    LaunchedEffect(Unit) {
+        if (ChatPendienteNotificacion.hayChatPendiente()) {
+            val idChat = ChatPendienteNotificacion.idChat
+            val nombre = ChatPendienteNotificacion.nombre
+
+            navController.navigate("${AppScreens.chatsP.name}/$idChat/$nombre")
+
+            ChatPendienteNotificacion.limpiar()
+        }
+    }
     NavHost(navController, startDestination = AppScreens.Appstart.name){
         composable (route= AppScreens.Appstart.name){
             AppStart(navController)
