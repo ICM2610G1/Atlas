@@ -12,18 +12,38 @@ data class FormularioEjercicioState(
 )
 
 class FormularioEjercicioViewModel : ViewModel() {
-    private val _formularioState = MutableStateFlow(FormularioEjercicioState())
-    val formularioState = _formularioState.asStateFlow()
 
-    fun updateSeries(value: String) {
-            _formularioState.update { it.copy(series = value) }
+    private val _formularios = MutableStateFlow<Map<String, FormularioEjercicioState>>(emptyMap())
+    val formularios = _formularios.asStateFlow()
+
+    fun updateSeries (id : String , value: String ){
+
+        _formularios.update{
+            val mutableMap = it.toMutableMap()
+            val formActual = mutableMap[id] ?: FormularioEjercicioState()
+            val formNuevo = formActual.copy(series = value)
+            mutableMap[id] = formNuevo
+            mutableMap
+        }
     }
+    fun updateRepeticiones  (id : String , value: String ){
 
-    fun updateRepeticiones(value: String) {
-            _formularioState.update { it.copy(repeticiones = value) }
+        _formularios.update{
+            val mutableMap = it.toMutableMap()
+            val formActual = mutableMap[id] ?: FormularioEjercicioState()
+            val formNuevo = formActual.copy(repeticiones = value)
+            mutableMap[id] = formNuevo
+            mutableMap
+        }
     }
+    fun updatePeso (id : String, value: String ){
 
-    fun updatePeso(value: String) {
-            _formularioState.update { it.copy(peso = value) }
+        _formularios.update{
+            val mutableMap = it.toMutableMap()
+            val formActual = mutableMap[id] ?: FormularioEjercicioState()
+            val formNuevo = formActual.copy(peso = value)
+            mutableMap[id] = formNuevo
+            mutableMap
+        }
     }
 }
