@@ -43,13 +43,14 @@ import com.example.atlas.elements.DefaultBottomBarEnt
 import com.example.atlas.elements.DefaultTopAppBar
 import com.example.atlas.navegation.AppScreens
 import com.example.atlas.viewmodels.CatalogoEjercicioViewModel
+import com.example.atlas.viewmodels.FormularioEjercicioState
 
 import com.example.atlas.viewmodels.FormularioEjercicioViewModel
 
 @Composable
 fun CatalogoActividades(controller: NavController, model: CatalogoEjercicioViewModel = viewModel(), modelE: EjercicioViewModel = viewModel(), formularioViewModel: FormularioEjercicioViewModel = viewModel(), ) {
     val disponibles by model.listaDisponibles.collectAsState()
-    val formState by formularioViewModel.formularioState.collectAsState()
+    val formularios by formularioViewModel.formularios.collectAsState()
 
     Scaffold(
         topBar = { DefaultTopAppBar("Seleccionar Ejercicio") },
@@ -61,7 +62,8 @@ fun CatalogoActividades(controller: NavController, model: CatalogoEjercicioViewM
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(vertical = 15.dp)
             ) {
-                items(disponibles) { ejercicio ->
+                items(disponibles , key = { it.idActividad }) { ejercicio ->
+                    val form = formularios[ejercicio.idActividad] ?: FormularioEjercicioState()
                     ElevatedCard(
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -78,39 +80,37 @@ fun CatalogoActividades(controller: NavController, model: CatalogoEjercicioViewM
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 TextField(
-                                    value = formState.series,
-                                    onValueChange = { formularioViewModel.updateSeries(it) },
+                                    value = form.series,
+                                    onValueChange = { formularioViewModel.updateSeries(ejercicio.idActividad, it) },
                                     label = { Text("Series") },
                                     modifier = Modifier.weight(1f),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
                                 TextField(
-                                    value = formState.repeticiones,
-                                    onValueChange = { formularioViewModel.updateRepeticiones(it) },
+                                    value = form.repeticiones,
+                                    onValueChange = { formularioViewModel.updateRepeticiones(ejercicio.idActividad, it)},
                                     label = { Text("Reps") },
                                     modifier = Modifier.weight(1f),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
                                 TextField(
-                                    value = formState.peso,
-                                    onValueChange = { formularioViewModel.updatePeso(it) },
+                                    value = form.peso,
+                                    onValueChange = { formularioViewModel.updatePeso(ejercicio.idActividad, it) },
                                     label = { Text("Kg") },
                                     modifier = Modifier.weight(1f),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(12.dp))
-
-
+                    
                             DefaulButton("Agregar a la sesión", 200, 40) {
                                 modelE.guardarEjercicio(
                                     idActividad   = ejercicio.idActividad,
                                     nombre        = ejercicio.nombre,
                                     grupoMuscular = ejercicio.grupoMuscular,
-                                    series        = formState.series.toIntOrNull() ?: 3,
-                                    repeticiones  = formState.repeticiones.toIntOrNull() ?: 10,
-                                    peso          = formState.peso.toDoubleOrNull() ?: 0.0
+                                    series        = form.series.toIntOrNull() ?: 3,
+                                    repeticiones  = form.repeticiones.toIntOrNull() ?: 10,
+                                    peso          = form.peso.toDoubleOrNull() ?: 0.0
                                 )
                                 controller.navigate(route= AppScreens.Ejercicios.name)
                             }
