@@ -1,5 +1,6 @@
 package com.example.atlas.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import coil.request.Tags
 import com.example.atlas.R
 import com.example.atlas.elements.DefaulButton
 import com.example.atlas.elements.DefaultBottomBarDep
@@ -47,6 +49,7 @@ fun ResumenSesion(controller: NavController, model: ResumenSesionViewModel = vie
     val sesionState by modelSesion.uiState.collectAsState()
 
     LaunchedEffect(sesionState.idSesionActiva) {
+        Log.i("DEBUG_SESION", "Resumen leyendo ${sesionState.idSesionActiva}")
         model.cargarResumen(sesionState.idSesionActiva)
     }
 
@@ -120,7 +123,7 @@ fun ResumenSesion(controller: NavController, model: ResumenSesionViewModel = vie
                         DatoResumenSesion("Actividad", state.tipoActividad)
                         DatoResumenSesion("Distancia", "${state.distanciaKm} km")
                         DatoResumenSesion("Tiempo", "${state.tiempoSegundos} s")
-                        DatoResumenSesion("Calorías", "${state.caloriasTotal} Kcal")
+                        DatoResumenSesion("Calorías","${String.format("%.2f", state.caloriasTotal)} Kcal")
                     }
                 }
             }

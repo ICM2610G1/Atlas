@@ -47,8 +47,9 @@ class CrearSesionViewModel : ViewModel() {
             refSesiones.child(nuevoId).setValue(nuevaSesion)
                 .addOnSuccessListener {
                     _uiState.update { it.copy(idSesionActiva = nuevoId) }
-                    Log.i("DEBUG_SESION", "idSesionActiva listo: $nuevoId")
                 }
+            Log.i("DEBUG_SESION", "idSesionActiva listo: $nuevoId")
+
         }
     }
     fun terminarSesion() {
