@@ -35,16 +35,19 @@ class ResumenSesionViewModel : ViewModel() {
     private var duracionSesionGeneralSegundos: Int = 0
 
     fun cargarResumen(idSesion: String) {
-        if (idSesion.isEmpty()) {
-            return
-        }
+
+        if (idSesion.isBlank()) return
+
+        _state.value = ResumenSesionState()
 
         database.getReference("deportistas/${auth.currentUser?.uid}/peso")
             .addListenerForSingleValueEvent(object : ValueEventListener {
+
                 override fun onDataChange(pesoSnapshot: DataSnapshot) {
                     pesoUser = pesoSnapshot.getValue(Float::class.java) ?: 0f
                     cargarDatosDeSesion(idSesion)
                 }
+
                 override fun onCancelled(error: DatabaseError) {
                     Log.w("ResumenSesionViewModel", "Error leyendo peso", error.toException())
                     cargarDatosDeSesion(idSesion)
@@ -53,46 +56,66 @@ class ResumenSesionViewModel : ViewModel() {
     }
 
     private fun cargarDatosDeSesion(idSesion: String) {
+
         database.getReference("Sesiones/$idSesion")
             .addListenerForSingleValueEvent(object : ValueEventListener {
+
                 override fun onDataChange(snapshot: DataSnapshot) {
                     duracionSesionGeneralSegundos = snapshot.child("duracion").getValue(Int::class.java) ?: 0
+
 
                     val idAerobico = snapshot.child("idAerobico").getValue(String::class.java) ?: ""
                     val idFuerza = snapshot.child("idFuerza").getValue(String::class.java) ?: ""
 
                     Log.d("ResumenSesionViewModel", "idAerobico: $idAerobico, idFuerza: $idFuerza")
 
-                    if (idAerobico.isNotEmpty()) escucharAerobico(idAerobico)
-                    if (idFuerza.isNotEmpty()) escucharFuerza(idFuerza)
+                    if (idAerobico.isNotBlank()) {
+                        escucharAerobico(idAerobico)
+                    }
+                    if (idFuerza.isNotBlank()) {
+                        escucharFuerza(idFuerza)
+                    }
                 }
+
                 override fun onCancelled(error: DatabaseError) {
-                    Log.w("ResumenSesionViewModel", "Error cargando estructura de sesión", error.toException())
+                    Log.w("ResumenSesionViewModel", "Error leyendo sesión", error.toException())
                 }
             })
     }
 
     private fun escucharAerobico(idAerobico: String) {
+
         val ref = database.getReference("SesionesTrote/$idAerobico")
         listenerAerobico = ref.addValueEventListener(object : ValueEventListener {
+
             override fun onDataChange(snapshot: DataSnapshot) {
+                if (!snapshot.exists()) {
+                    Log.d("ResumenSesionViewModel", "No existe SesionesTrote/$idAerobico")
+                    return
+                }
+
                 val distancia = snapshot.child("distancia").getValue(Double::class.java) ?: 0.0
+
                 val velocidad = snapshot.child("valeocidadPromedio").getValue(Double::class.java) ?: 0.0
+
                 val temperatura = snapshot.child("temperaturaPromedio").getValue(Float::class.java) ?: 0.0f
+
                 val duracion = snapshot.child("duracion").getValue(Int::class.java) ?: 0
+
                 val tipoActividad = snapshot.child("tipoActividad").getValue(String::class.java) ?: ""
 
                 val factorDeTemperatura = if (temperatura > 30f) 1.1f else 1.0f
 
                 val tiempoHoras = duracion / 3600.0f
-                val x = tipoActividad.uppercase()
-                val met = when {
-                    x == "TROTE" -> 9.8f
-                    x == "CICLISMO" -> 4.0f
-                    x == "SENDERISMO" -> 7.0f
+
+                val met = when (tipoActividad.uppercase()) {
+                    "TROTE" -> 9.8f
+                    "CICLISMO" -> 4.0f
+                    "SENDERISMO" -> 7.0f
                     else -> 7.0f
                 }
-                val caloriasAerobico = (met * pesoUser * tiempoHoras * factorDeTemperatura).toDouble()
+
+                val caloriasAerobico =(met * pesoUser * tiempoHoras * factorDeTemperatura).toDouble()
 
                 _state.update {
                     it.copy(
@@ -106,15 +129,16 @@ class ResumenSesionViewModel : ViewModel() {
                     )
                 }
 
-                Log.i("Verificación","${state.value.distanciaKm}")
-                Log.i("Verificación","${state.value.caloriasTotal}")
-                Log.i("Verificación","${state.value.numEjercicios}")
-                Log.i("Verificación","${state.value.tiempoSegundos}")
-                Log.i("Verificación","${state.value.velocidadPromedio}")
-                Log.i("Verificación","${state.value.caloriasAerobico}")
-                Log.i("Verificación","${state.value.caloriasFuerza}")
-                Log.i("Verificación","${state.value.temperaturaPromedio}")
+                Log.i("Verificación", "${state.value.distanciaKm}")
+                Log.i("Verificación", "${state.value.caloriasTotal}")
+                Log.i("Verificación", "${state.value.numEjercicios}")
+                Log.i("Verificación", "${state.value.tiempoSegundos}")
+                Log.i("Verificación", "${state.value.velocidadPromedio}")
+                Log.i("Verificación", "${state.value.caloriasAerobico}")
+                Log.i("Verificación", "${state.value.caloriasFuerza}")
+                Log.i("Verificación", "${state.value.temperaturaPromedio}")
             }
+
             override fun onCancelled(error: DatabaseError) {
                 Log.w("ResumenSesionViewModel", "Error leyendo trote", error.toException())
             }
@@ -122,17 +146,13 @@ class ResumenSesionViewModel : ViewModel() {
     }
 
     private fun escucharFuerza(idFuerza: String) {
+
         val ref = database.getReference("SesionesFUERZA/$idFuerza/ejercicios")
 
         listenerFuerza = ref.addValueEventListener(object : ValueEventListener {
-
             override fun onDataChange(snapshot: DataSnapshot) {
-
-                Log.i(
-                    "DEBUG_FUERZA",
-                    "Ejercicios encontrados: ${snapshot.childrenCount}"
+                Log.i("DEBUG_FUERZA", "Ejercicios encontrados: ${snapshot.childrenCount}"
                 )
-
                 val numEjercicios = snapshot.childrenCount.toInt()
 
                 if (numEjercicios == 0) {
@@ -148,20 +168,11 @@ class ResumenSesionViewModel : ViewModel() {
                 var acumuladoCaloriasFuerza = 0.0
 
                 val tiempoEjercicioHoras = 2f
-
                 val factorDeTemperatura = 1.0f
 
                 for (ejercicioSnapshot in snapshot.children) {
 
-                    val grupoMuscular =
-                        ejercicioSnapshot.child("grupoMuscular")
-                            .getValue(String::class.java)
-                            ?: ""
-
-                    Log.i(
-                        "DEBUG_FUERZA",
-                        "Grupo muscular encontrado: $grupoMuscular"
-                    )
+                    val grupoMuscular = ejercicioSnapshot.child("grupoMuscular").getValue(String::class.java) ?: ""
 
                     val met = when (grupoMuscular.uppercase()) {
                         "HOMBRO",
@@ -169,13 +180,10 @@ class ResumenSesionViewModel : ViewModel() {
                         "PECHO",
                         "ESPALDA",
                         "BRAZO" -> 6.0f
-
                         else -> 5.0f
                     }
 
-                    val caloriasEjercicio =
-                        met * pesoUser * tiempoEjercicioHoras * factorDeTemperatura
-
+                    val caloriasEjercicio =met * pesoUser * tiempoEjercicioHoras * factorDeTemperatura
                     acumuladoCaloriasFuerza += caloriasEjercicio
                 }
 
@@ -186,28 +194,17 @@ class ResumenSesionViewModel : ViewModel() {
                         caloriasTotal = it.caloriasAerobico + acumuladoCaloriasFuerza
                     )
                 }
-
-                Log.i(
-                    "DEBUG_FUERZA",
-                    "Calorías fuerza: $acumuladoCaloriasFuerza"
-                )
-
-                Log.i(
-                    "DEBUG_FUERZA",
-                    "Calorías totales: ${state.value.caloriasTotal}"
-                )
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.w(
-                    "ResumenSesionViewModel",
-                    "Error leyendo ejercicios de fuerza",
-                    error.toException()
-                )
+                Log.w("ResumenSesionViewModel", "Error leyendo fuerza", error.toException())
             }
         })
     }
+
     override fun onCleared() {
         super.onCleared()
+        listenerAerobico = null
+        listenerFuerza = null
     }
 }

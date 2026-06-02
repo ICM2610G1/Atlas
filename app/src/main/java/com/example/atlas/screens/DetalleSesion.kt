@@ -66,7 +66,11 @@ fun DetalleSesion(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Card actividad en movimiento
-            if (state.distanciaKm > 0) {
+            if (
+                state.tipoActividad.isNotBlank() ||
+                state.tiempoSegundos > 0 ||
+                state.distanciaKm > 0
+            ) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -198,7 +202,7 @@ fun DetalleSesion(
                                     textAlign = TextAlign.Center
                                 )
                                 Text(
-                                    "${state.caloriasTotal} kcal",
+                                    "${String.format("%.2f", state.caloriasTotal)} Kcal",
                                     color = colorResource(R.color.rojoGranada),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 18.sp
@@ -210,8 +214,18 @@ fun DetalleSesion(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            if (state.distanciaKm == 0.0 && state.numEjercicios == 0) {
-                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+            if (
+                state.tipoActividad.isBlank() &&
+                state.tiempoSegundos == 0 &&
+                state.distanciaKm == 0.0 &&
+                state.numEjercicios == 0
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator(color = colorResource(R.color.rojoGranada))
                 }
             }
